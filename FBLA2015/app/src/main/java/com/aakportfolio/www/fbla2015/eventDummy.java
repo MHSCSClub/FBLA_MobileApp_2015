@@ -12,6 +12,7 @@ public class eventDummy extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_dummy);
+        setTitle("Hello");
     }
 
 
@@ -30,9 +31,6 @@ public class eventDummy extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }

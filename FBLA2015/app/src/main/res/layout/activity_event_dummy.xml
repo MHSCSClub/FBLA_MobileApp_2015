@@ -29,9 +29,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="No Descriotion"
+                android:text="No Description"
                 android:id="@+id/textView" />
         </ScrollView>
 
+
+
     </LinearLayout>
+
 </RelativeLayout>

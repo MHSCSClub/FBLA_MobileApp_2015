@@ -63,5 +63,13 @@
 
     </LinearLayout>
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button"
+        android:clickable="true"
+        android:onClick="sendMessage"
+        android:text="Test Launch Activity 2" />
+
 
 </RelativeLayout>
