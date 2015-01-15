@@ -9,17 +9,26 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:weightSum="3">
 
         <ViewFlipper
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:id="@+id/viewFlipper"
             android:nestedScrollingEnabled="true"
             android:autoStart="true"
             android:animateFirstView="true"
             android:flipInterval="1000"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="2">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/imageView"
+                android:src="#ff00ff24"
+                android:adjustViewBounds="true" />
 
             <ImageView
                 android:layout_width="match_parent"
@@ -32,24 +41,25 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/imageView"
-                android:src="#ff00ff24"
-                android:adjustViewBounds="true" />
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
                 android:id="@+id/imageView5"
                 android:src="#ffff0010"
                 android:adjustViewBounds="true" />
 
         </ViewFlipper>
 
-        <ListView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/listView"
-            android:visibility="visible" />
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1">
+
+            <ListView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/listView"
+                android:visibility="visible"
+                android:entries="@array/list"
+                android:layout_weight="1" />
+        </FrameLayout>
 
     </LinearLayout>
 
