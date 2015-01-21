@@ -58,7 +58,8 @@
                 android:id="@+id/listView"
                 android:visibility="visible"
                 android:entries="@array/list"
-                android:layout_weight="1" />
+                style="@style/Base.Widget.AppCompat.ListView.Menu" />
+
         </FrameLayout>
 
     </LinearLayout>
@@ -70,6 +71,8 @@
         android:clickable="true"
         android:onClick="sendMessage"
         android:text="Test Launch Activity 2" />
+
+
 
 
 </RelativeLayout>

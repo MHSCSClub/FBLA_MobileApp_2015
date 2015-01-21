@@ -12,25 +12,32 @@
         android:layout_height="fill_parent"
         android:weightSum="5">
 
-        <ImageView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/imageView3"
-            android:layout_weight="1"
-            android:src="@drawable/noimg"
-            android:scaleType="fitCenter" />
-
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/scrollView"
-            android:layout_weight="4">
+            android:layout_weight="4.75">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="No Description"
-                android:id="@+id/textView" />
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:text="MM/DD/YYYY"
+                    android:id="@+id/textView2"
+                    android:autoText="false" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:text="No Description"
+                    android:id="@+id/textView" />
+
+            </LinearLayout>
         </ScrollView>
 
         <Button
@@ -38,7 +45,7 @@
             android:layout_height="wrap_content"
             android:text="Email Event Organizer"
             android:id="@+id/button2"
-            android:layout_weight="1" />
+            android:layout_weight="0.25" />
 
 
     </LinearLayout>

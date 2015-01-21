@@ -15,6 +15,8 @@ public class eventDummy extends ActionBarActivity {
         Intent intent = getIntent();
         setContentView(R.layout.activity_event_dummy);
         setTitle(intent.getStringExtra("titleBar"));
+        //TODO Parse object and do the stuff with it.
+        //TODO Do onclick of button
     }
 
 
