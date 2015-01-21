@@ -1,11 +1,11 @@
 package com.aakportfolio.www.fbla2015;
 
-import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.View;
-import android.content.Intent;
-import android.view.MenuItem;
+        import android.support.v7.app.ActionBarActivity;
+        import android.os.Bundle;
+        import android.view.Menu;
+        import android.view.View;
+        import android.content.Intent;
+        import android.view.MenuItem;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -37,6 +37,8 @@ public class MainActivity extends ActionBarActivity {
     }
     public void sendMessage(View view) {
         Intent intent = new Intent(this, eventDummy.class);
+        //We will try to launch the activity instead with what was selected from
+        intent.putExtra("titleBar","Untitled");
         startActivity(intent);
     }
 }
