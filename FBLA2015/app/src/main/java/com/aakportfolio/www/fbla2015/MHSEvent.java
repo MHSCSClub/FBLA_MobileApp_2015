@@ -8,7 +8,7 @@ import android.widget.TextView;
 public class MHSEvent {
     private String eventName = "Untitled Event";
     private String eventDescription = "No Description";
-    private String contactEmail = "events-temp@student.mamkschools.org";    //This will change
+    private String contactEmail = "events-temp@mamkschools.org";
     private int MM;
     private int DD;
     private int YYYY;
