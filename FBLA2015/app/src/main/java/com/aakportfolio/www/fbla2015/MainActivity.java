@@ -6,7 +6,11 @@ package com.aakportfolio.www.fbla2015;
         import android.view.View;
         import android.content.Intent;
         import android.view.MenuItem;
+        import android.widget.ListView;
         import java.util.ArrayList;
+        import android.widget.AdapterView;
+        import android.widget.AdapterView.OnItemClickListener;
+        import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -19,6 +23,20 @@ public class MainActivity extends ActionBarActivity {
         //TODO download TSV or use local if needed. if no local, used hardcoded string or have extracted TSV
         //TODO Parse TSV to fill listview. Don't forget to add wait progress bar on activity, or as dialoge
         //TODO Fill ListView with titles from parsed TSV
+        final String Names[]={"USA","RUSSIA","ENGLAND","AUSTRALIA","JAPAN"};
+
+        ListView LV=(ListView) findViewById(R.id.listView);
+
+        LV.setOnItemClickListener(new OnItemClickListener() {
+
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+                                    long arg3) {
+                // TODO Auto-generated method stub
+
+                sendMessage(arg1,position);
+                }
+        });
+
 
     }
 
@@ -40,7 +58,7 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-    public void sendMessage(View view) {
+    public void sendMessage(View view, int arrPOS) {
         Intent intent = new Intent(this, eventDummy.class);
         //We will try to launch the activity instead with what was selected from
         intent.putExtra("titleBar","Untitled"); //TODO Replace with selected OBJECT, looked up by position (in arraylist and listview)
