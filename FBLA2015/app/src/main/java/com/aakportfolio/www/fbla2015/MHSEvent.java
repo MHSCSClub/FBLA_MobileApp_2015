@@ -1,11 +1,14 @@
 package com.aakportfolio.www.fbla2015;
 
-import android.widget.TextView;
+import java.io.Serializable;
 
 /**
+ * TODO Make the class serializable
  * Created by Andrew on 1/19/2015.
  */
-public class MHSEvent {
+
+
+public class MHSEvent implements Serializable{
     private String eventName = "Untitled Event";
     private String eventDescription = "No Description";
     private String contactEmail = "events-temp@mamkschools.org";
@@ -34,8 +37,18 @@ public class MHSEvent {
     public String getContactEmail(){
         return contactEmail;
     }
+
+    /**
+     * Compares date and sees if should be displayed.
+     * @param nowMM Current Month
+     * @param nowDD Current Day
+     * @param nowYYYY Current Year
+     * @return
+     */
     public boolean showEvent(int nowMM, int nowDD, int nowYYYY){
-        //TODO: write this method properly
-        return true;
+        return nowMM <= MM && nowDD <= DD && nowYYYY <= YYYY;
+    }
+    public String toString(){
+        return getEventName();
     }
 }
