@@ -1,6 +1,8 @@
 package com.aakportfolio.www.fbla2015;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
@@ -26,15 +28,32 @@ public class eventDummy extends ActionBarActivity {
         descriptionTextView.setText(e.getEventDescription());
     }
     public void sendMessage(View v){
-        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-        emailIntent.setData(Uri.parse("mailto:" + e.getContactEmail()));
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Questions about an event: " + e);
-        emailIntent.putExtra(Intent.EXTRA_TEXT, "Please explain your questions here.");
+        new AlertDialog.Builder(this)
+                .setTitle("Email Organizer")
+                .setMessage("Are you sure you want to send an email to the event organizer (email address: " + e.getContactEmail() + ")?")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                        emailIntent.setData(Uri.parse("mailto:" + e.getContactEmail()));
+                        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Questions about an event: " + e);
+                        emailIntent.putExtra(Intent.EXTRA_TEXT, "Please explain your questions here.");
 
-        try {
-            startActivity(Intent.createChooser(emailIntent, "Send email using..."));
-        } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(eventDummy.this, "No email clients installed.", Toast.LENGTH_SHORT).show();
-        }
+                        try {
+                            startActivity(Intent.createChooser(emailIntent, "Send email using..."));
+                        } catch (android.content.ActivityNotFoundException ex) {
+                            Toast.makeText(eventDummy.this,
+                                    "No email clients installed.\nYou may manually email this address: " + e.getContactEmail(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+
     }
 }

@@ -62,6 +62,7 @@ public class MainActivity extends ActionBarActivity {
                 i--;
             }
         }
+        //TODO then sort them by date...
     }
 
     private void fillListView(){
