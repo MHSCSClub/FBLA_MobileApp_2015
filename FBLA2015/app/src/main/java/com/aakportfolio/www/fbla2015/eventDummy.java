@@ -1,33 +1,33 @@
 package com.aakportfolio.www.fbla2015;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-
 public class eventDummy extends ActionBarActivity {
     MHSEvent e;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         setContentView(R.layout.activity_event_dummy);
-        e = (MHSEvent)intent.getSerializableExtra("event");
+        e = (MHSEvent) intent.getSerializableExtra("event");
         setTitle(e + "");
         TextView dateTextView = (TextView) findViewById(R.id.dateView);
-        dateTextView.setText(e.getEventDate());
+        dateTextView.setText(e.getEventDates());
         TextView descriptionTextView = (TextView) findViewById(R.id.descriptionView);
         descriptionTextView.setText(e.getEventDescription());
     }
-    public void sendMessage(View v){
+
+    public void sendMessage(View v) {
         new AlertDialog.Builder(this)
                 .setTitle("Email Organizer")
                 .setMessage("Are you sure you want to send an email to the event organizer (email address: " + e.getContactEmail() + ")?")
