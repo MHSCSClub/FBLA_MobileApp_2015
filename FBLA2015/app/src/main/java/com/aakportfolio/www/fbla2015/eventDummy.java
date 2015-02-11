@@ -3,6 +3,7 @@ package com.aakportfolio.www.fbla2015;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -33,17 +34,23 @@ public class eventDummy extends ActionBarActivity {
                 .setMessage("Are you sure you want to send an email to the event organizer (email address: " + e.getContactEmail() + ")?")
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                        emailIntent.setData(Uri.parse("mailto:" + e.getContactEmail()));
-                        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Questions about an event: " + e);
-                        emailIntent.putExtra(Intent.EXTRA_TEXT, "Please explain your questions here.");
 
-                        try {
-                            startActivity(Intent.createChooser(emailIntent, "Send email using..."));
-                        } catch (android.content.ActivityNotFoundException ex) {
+                        if (!isGMailInstalled()) {
                             Toast.makeText(eventDummy.this,
                                     "No email clients installed.\nYou may manually email this address: " + e.getContactEmail(),
                                     Toast.LENGTH_LONG).show();
+                        } else {
+                            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                            emailIntent.setData(Uri.parse("mailto:" + e.getContactEmail()));
+                            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Questions about an event: " + e);
+                            emailIntent.putExtra(Intent.EXTRA_TEXT, "Please explain your questions here.");
+                            try {
+                                startActivity(Intent.createChooser(emailIntent, "Please select email application"));
+                            } catch (android.content.ActivityNotFoundException ex) {
+                                Toast.makeText(eventDummy.this,
+                                        "No email clients installed.\nYou may manually email this address: " + e.getContactEmail(),
+                                        Toast.LENGTH_LONG).show();
+                            }
                         }
                     }
                 })
@@ -52,8 +59,17 @@ public class eventDummy extends ActionBarActivity {
                         // do nothing
                     }
                 })
-                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setIcon(android.R.drawable.ic_dialog_email)
                 .show();
 
+    }
+
+    public boolean isGMailInstalled() {
+        try {
+            getPackageManager().getApplicationInfo("com.google.android.apps.plus", 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 }

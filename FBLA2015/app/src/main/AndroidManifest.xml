@@ -2,7 +2,6 @@
     package="com.aakportfolio.www.fbla2015">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -20,7 +19,7 @@
         </activity>
         <activity
             android:name=".eventDummy"
-            android:label="@string/title_activity_event_dummy"></activity>
+            android:label="@string/title_activity_event_dummy" />
     </application>
 
 </manifest>

@@ -25,6 +25,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,8 +34,8 @@ import java.util.Scanner;
 
 
 public class MainActivity extends ActionBarActivity {
-    ListView LV;
-    ArrayList<MHSEvent> Events;
+    private ListView LV;
+    private static ArrayList<MHSEvent> Events;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +68,7 @@ public class MainActivity extends ActionBarActivity {
                 i--;
             }
         }
-        //TODO then sort them by date...
+        Collections.sort(Events);
     }
 
     private void fillListView() {
@@ -86,12 +87,11 @@ public class MainActivity extends ActionBarActivity {
             }
         }
         String[] fileLines = s.split("\n");
-        Events = new ArrayList<MHSEvent>();
+        Events = new ArrayList<>(fileLines.length);
+        for (String str : fileLines) {
+            if (str.split(",,").length == 6) Events.add(new MHSEvent(str.split(",,")));
+        }
         while (Events.size() == 0) {
-            for (String str : fileLines) {
-                if (str.split(",,").length == 6) Events.add(new MHSEvent(str.split(",,")));
-            }
-            if (Events.size() == 0) {
                 makeCSV();
                 tryAgain = true;
                 while (tryAgain) {
@@ -107,18 +107,16 @@ public class MainActivity extends ActionBarActivity {
                     }
                 }
                 fileLines = s.split("\n");
+            for (String str : fileLines) {
+                if (str.split(",,").length == 6) Events.add(new MHSEvent(str.split(",,")));
             }
         }
         orderAndRemoveEvents();
-        String[] EventArray = new String[Events.size()];
-        for (int i = 0; i < Events.size(); i++) {
-            EventArray[i] = Events.get(i) + "";
-        }
-        List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+        List<Map<String, String>> data = new ArrayList<>();
         for (MHSEvent item : Events) {
-            Map<String, String> datum = new HashMap<String, String>(2);
+            Map<String, String> datum = new HashMap<>(2);
             datum.put("title", item.toString());
-            datum.put("date", item.getEventStartDate());
+            datum.put("date", item.getEventStartDate() + " - " + item.getEventEndDate());
             data.add(datum);
         }
         SimpleAdapter adapter = new SimpleAdapter(this, data,
@@ -129,8 +127,13 @@ public class MainActivity extends ActionBarActivity {
         LV.setAdapter(adapter);
     }
 
+    //TODO Make the CSV with real events
     private void makeCSV() {
-        Scanner s = new Scanner(new InputStreamReader(getResources().openRawResource(R.raw.cal)));
+        Scanner s;
+
+        s = new Scanner(new InputStreamReader(getResources().openRawResource(R.raw.cal)));
+
+
         String cal = "";
         while (s.hasNextLine()) {
             cal += s.nextLine() + "\n";
@@ -155,33 +158,41 @@ public class MainActivity extends ActionBarActivity {
             public void run() {
                 // do the thing that takes a long time
                 AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+                    private boolean fail = true;
                     @Override
                     protected Void doInBackground(Void... params) {
                         try {
                             try {
+
                                 String fileName = "cal.csv";
 
-                                URL website = new URL("http://ichart.finance.yahoo.com/table.csv?s=AAPL");
+                                URL website = new URL("http://ichart.finance.yahoo.com/table.csv?s=AAPL"); //TODO Put URL
                                 ReadableByteChannel rbc = Channels.newChannel(website.openStream());
                                 FileOutputStream outputStream;
                                 outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
                                 outputStream.getChannel().transferFrom(rbc, 0, 10 * 1024 * 1024);
                                 outputStream.close();
                                 rbc.close();
-                                Toast.makeText(a, "Update completed.", Toast.LENGTH_SHORT).show();
+                                fail = false;
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                Toast.makeText(a, "Could not download event list.", Toast.LENGTH_SHORT).show();
+                                fail = true;
                             }
 
                         } catch (Exception e) {
-                            Toast.makeText(a, "Could not download event list.", Toast.LENGTH_SHORT).show();
+                            fail = true;
+                            e.printStackTrace();
                         }
                         return null;
                     }
 
                     @Override
                     protected void onPostExecute(Void result) {
+                        if (fail) {
+                            Toast.makeText(a, "Could not download event list.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(a, "Update completed.", Toast.LENGTH_SHORT).show();
+                        }
                         fillListView();
                         progress.dismiss();
                     }
@@ -210,17 +221,17 @@ public class MainActivity extends ActionBarActivity {
         switch (id) {
             case R.id.action_update:
                 update();
-                return true;
+                return super.onOptionsItemSelected(item);
             default:
                 return super.onOptionsItemSelected(item);
         }
 
 
     }
-
     public void sendMessage(View view, int arrPOS) {
         Intent intent = new Intent(this, eventDummy.class);
         //We will try to launch the activity instead with what was selected from
+        intent.putExtra("event", Events.get(arrPOS)); //TODO Replace with selected OBJECT, looked up by position (in arraylist and listview)
         intent.putExtra("event", Events.get(arrPOS));
         startActivity(intent);
     }
