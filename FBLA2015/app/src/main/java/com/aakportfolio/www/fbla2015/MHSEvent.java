@@ -23,11 +23,11 @@ public class MHSEvent implements Serializable, Comparable {
     public MHSEvent(String name, String Description, String startDate, String endDate, String startTime, String endTime) {
         eventName = name;
         eventDesceription = "";
-        if(!startTime.equals("")){
+        if(!startTime.equals(" ")){
             if(startTime.equals("allday")) eventDescription += "All day event";
             else{
                 eventDescription += "Start time: " + startTime + "\n";
-                if(!endTime.equals("")){
+                if(!endTime.equals(" ")){
                     eventDescription += "End Time: " + endTime + "\n";
                 }
         }
