@@ -22,7 +22,20 @@ public class MHSEvent implements Serializable, Comparable {
 
     public MHSEvent(String name, String Description, String startDate, String endDate, String startTime, String endTime) {
         eventName = name;
-        eventDescription = "Start time: " + startTime + "\nEnd Time: " + endTime + "\n" + Description;
+        eventDesceription = "";
+        if(!startTime.equals("")){
+            if(startTime.equals("allday")) eventDescription += "All day event";
+            else{
+                eventDescription += "Start time: " + startTime + "\n";
+                if(!endTime.equals("")){
+                    eventDescription += "End Time: " + endTime + "\n";
+                }
+        }
+        if(Description.equals("")){
+            eventDescription += "No Description";
+        } else {
+            eventDescription += Description;
+        }
         MM = Integer.parseInt(startDate.substring(0, 2));
         DD = Integer.parseInt(startDate.substring(3, 5));
         YYYY = Integer.parseInt(startDate.substring(6));
