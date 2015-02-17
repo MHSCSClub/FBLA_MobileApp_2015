@@ -3,6 +3,7 @@ package com.aakportfolio.www.fbla2015;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 /**
  * Created by Andrew on 1/19/2015.
@@ -20,28 +21,31 @@ public class MHSEvent implements Serializable, Comparable {
     private String eventEndDate;
 
 
-    public MHSEvent(String name, String Description, String startDate, String endDate, String startTime, String endTime) {
+    public MHSEvent(String name, String Description, String startDate, String startTime, String endDate, String endTime) {
         eventName = name;
-        eventDesceription = "";
-        if(!startTime.equals(" ")){
-            if(startTime.equals("allday")) eventDescription += "All day event";
-            else{
+        eventDescription = eventName + "\n";
+        if (!startTime.trim().equals("none")) {
+            if (startTime.trim().equals("allday")) {
+                eventDescription += "All day event" + "\n";
+            } else {
                 eventDescription += "Start time: " + startTime + "\n";
-                if(!endTime.equals(" ")){
+                if (!endTime.trim().equals("none")) {
                     eventDescription += "End Time: " + endTime + "\n";
                 }
+            }
         }
-        if(Description.equals("")){
+        if (Description.trim().equals("none")) {
             eventDescription += "No Description";
         } else {
             eventDescription += Description;
         }
-        MM = Integer.parseInt(startDate.substring(0, 2));
-        DD = Integer.parseInt(startDate.substring(3, 5));
-        YYYY = Integer.parseInt(startDate.substring(6));
+        MM = Integer.parseInt(startDate.split(Pattern.quote("/"))[0]);
+        DD = Integer.parseInt(startDate.split(Pattern.quote("/"))[1]);
+        YYYY = Integer.parseInt(startDate.split(Pattern.quote("/"))[2]);
         eventEndDate = endDate;
         eventStartDate = startDate;
-    }
+        }
+
 
     public MHSEvent(String[] inArr) {
         this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5]);
@@ -68,9 +72,11 @@ public class MHSEvent implements Serializable, Comparable {
      * @return Compares date and sees if should be displayed.
      */
     public boolean showEvent(int nowMM, int nowDD, int nowYYYY) {
-        int MM1 = Integer.parseInt(eventEndDate.substring(0, 2)),
-                DD1 = Integer.parseInt(eventEndDate.substring(3, 5)),
-                YYYY1 = Integer.parseInt(eventEndDate.substring(6));
+        int MM1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[0]),
+                DD1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[1]),
+                YYYY1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[2]);
+        if (nowYYYY > YYYY1) return false;
+
         return nowYYYY >= YYYY1 && (nowYYYY != YYYY1 || nowMM <= MM1 && nowDD <= DD1);
     }
 

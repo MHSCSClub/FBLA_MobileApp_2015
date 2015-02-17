@@ -17,12 +17,13 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import java.util.Scanner;
 public class MainActivity extends ActionBarActivity {
     private ListView LV;
     private static ArrayList<MHSEvent> Events;
+    private String downloadURL = "https://dl.dropboxusercontent.com/u/17404184/cal.csv";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,21 +94,21 @@ public class MainActivity extends ActionBarActivity {
             if (str.split(",,").length == 6) Events.add(new MHSEvent(str.split(",,")));
         }
         while (Events.size() == 0) {
-                makeCSV();
-                tryAgain = true;
-                while (tryAgain) {
-                    try {
-                        FileInputStream fis = openFileInput("cal.csv");
-                        Scanner scan = new Scanner(fis);
-                        while (scan.hasNextLine()) {
-                            s += scan.nextLine() + "\n";
-                        }
-                        tryAgain = false;
-                    } catch (Exception e) {
-                        makeCSV();
+            makeCSV();
+            tryAgain = true;
+            while (tryAgain) {
+                try {
+                    FileInputStream fis = openFileInput("cal.csv");
+                    Scanner scan = new Scanner(fis);
+                    while (scan.hasNextLine()) {
+                        s += scan.nextLine() + "\n";
                     }
+                    tryAgain = false;
+                } catch (Exception e) {
+                    makeCSV();
                 }
-                fileLines = s.split("\n");
+            }
+            fileLines = s.split("\n");
             for (String str : fileLines) {
                 if (str.split(",,").length == 6) Events.add(new MHSEvent(str.split(",,")));
             }
@@ -125,6 +127,7 @@ public class MainActivity extends ActionBarActivity {
                 new int[]{android.R.id.text1,
                         android.R.id.text2});
         LV.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 
     //TODO Make the CSV with real events
@@ -159,29 +162,32 @@ public class MainActivity extends ActionBarActivity {
                 // do the thing that takes a long time
                 AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
                     private boolean fail = true;
+
                     @Override
                     protected Void doInBackground(Void... params) {
+                        int count;
                         try {
-                            try {
 
-                                String fileName = "cal.csv";
-
-                                URL website = new URL("http://ichart.finance.yahoo.com/table.csv?s=AAPL"); //TODO Put URL
-                                ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-                                FileOutputStream outputStream;
-                                outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
-                                outputStream.getChannel().transferFrom(rbc, 0, 10 * 1024 * 1024);
-                                outputStream.close();
-                                rbc.close();
-                                fail = false;
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                fail = true;
+                            String fileName = "cal.csv";
+                            URL website = new URL(downloadURL);
+                            URLConnection connection = website.openConnection();
+                            connection.connect();
+                            InputStream input = new BufferedInputStream(website.openStream());
+                            FileOutputStream outputStream;
+                            outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
+                            byte data[] = new byte[1024];
+                            while ((count = input.read(data)) != -1) {
+                                // writing data to file
+                                outputStream.write(data, 0, count);
                             }
 
+                            outputStream.flush();
+                            outputStream.close();
+                            input.close();
+                            fail = false;
                         } catch (Exception e) {
-                            fail = true;
                             e.printStackTrace();
+                            fail = true;
                         }
                         return null;
                     }
@@ -228,10 +234,10 @@ public class MainActivity extends ActionBarActivity {
 
 
     }
+
     public void sendMessage(View view, int arrPOS) {
         Intent intent = new Intent(this, eventDummy.class);
         //We will try to launch the activity instead with what was selected from
-        intent.putExtra("event", Events.get(arrPOS)); //TODO Replace with selected OBJECT, looked up by position (in arraylist and listview)
         intent.putExtra("event", Events.get(arrPOS));
         startActivity(intent);
     }
