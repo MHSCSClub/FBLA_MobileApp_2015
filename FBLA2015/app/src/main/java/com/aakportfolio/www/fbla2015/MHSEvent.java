@@ -6,10 +6,11 @@ import java.io.Serializable;
 import java.util.regex.Pattern;
 
 /**
+ * This object is for storing an event (1 line from the CSV file)
  * Created by Andrew on 1/19/2015.
  */
 
-
+//TODO: implement the functionality to disable the email button, include email in constructor and file and eventDummy
 public class MHSEvent implements Serializable, Comparable {
     private String eventName = "Untitled Event";
     private String eventDescription = "No Description";
@@ -21,7 +22,7 @@ public class MHSEvent implements Serializable, Comparable {
     private String eventEndDate;
 
 
-    public MHSEvent(String name, String Description, String startDate, String startTime, String endDate, String endTime) {
+    public MHSEvent(String name, String Description, String startDate, String startTime, String endDate, String endTime, String email) {
         eventName = name;
         eventDescription = eventName + "\n";
         if (!startTime.trim().equals("none")) {
@@ -39,16 +40,26 @@ public class MHSEvent implements Serializable, Comparable {
         } else {
             eventDescription += Description;
         }
-        MM = Integer.parseInt(startDate.split(Pattern.quote("/"))[0]);
-        DD = Integer.parseInt(startDate.split(Pattern.quote("/"))[1]);
-        YYYY = Integer.parseInt(startDate.split(Pattern.quote("/"))[2]);
+        try {
+            MM = Integer.parseInt(startDate.split(Pattern.quote("/"))[0]);
+            DD = Integer.parseInt(startDate.split(Pattern.quote("/"))[1]);
+            YYYY = Integer.parseInt(startDate.split(Pattern.quote("/"))[2]);
+        } catch (Exception e) {
+            MM = 00;
+            DD = 00;
+            YYYY = 00;
+            eventStartDate = "00/00/0000";
+            eventEndDate = "00/00/0000";
+            e.printStackTrace();
+        }
         eventEndDate = endDate;
         eventStartDate = startDate;
-        }
+        contactEmail = email.trim();
+    }
 
 
     public MHSEvent(String[] inArr) {
-        this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5]);
+        this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5], inArr[6]);
     }
 
     public String getEventName() {
@@ -63,6 +74,9 @@ public class MHSEvent implements Serializable, Comparable {
         return contactEmail;
     }
 
+    public boolean showEmail() {
+        return !contactEmail.equals("none");
+    }
     /**
      * Compares date and sees if should be displayed.
      *
@@ -72,12 +86,16 @@ public class MHSEvent implements Serializable, Comparable {
      * @return Compares date and sees if should be displayed.
      */
     public boolean showEvent(int nowMM, int nowDD, int nowYYYY) {
-        int MM1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[0]),
-                DD1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[1]),
-                YYYY1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[2]);
-        if (nowYYYY > YYYY1) return false;
-
-        return nowYYYY >= YYYY1 && (nowYYYY != YYYY1 || nowMM <= MM1 && nowDD <= DD1);
+        try {
+            int MM1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[0]),
+                    DD1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[1]),
+                    YYYY1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[2]);
+            if (nowYYYY > YYYY1) return false;
+            return nowYYYY >= YYYY1 && (nowYYYY != YYYY1 || nowMM <= MM1 && nowDD <= DD1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public String toString() {

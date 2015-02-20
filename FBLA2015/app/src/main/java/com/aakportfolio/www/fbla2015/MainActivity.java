@@ -1,4 +1,11 @@
+//Filename: MainActivity.java
+/**
+ * This is the startijng activity for this android app.
+ * Upon launching the app, this file is used.
+ */
 package com.aakportfolio.www.fbla2015;
+
+//Import Section
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -32,22 +39,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+//End of Imports
 
-
+//TODO: add to calender option
+//TODO: Implement social media!
 public class MainActivity extends ActionBarActivity {
-    private ListView LV;
-    private static ArrayList<MHSEvent> Events;
+    private static ArrayList<MHSEvent> Events;  //This arraylist contians events from file
+    private ListView LV;    //Listview on main page
+    /* Either with production or prior to relaeese, this URL will be changed to
+     * point to the school server ww3
+     */
     private String downloadURL = "https://dl.dropboxusercontent.com/u/17404184/cal.csv";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {   //This is the method that runs at start
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle(R.string.title_activity_main);
 
-        LV = (ListView) findViewById(R.id.listView);
-        fillListView();
+        LV = (ListView) findViewById(R.id.listView); //Get our listview so we can edit it
+        fillListView(); //Read in our event file,, and fill list view
 
+        //This code fragment allows us to detect selections
         LV.setOnItemClickListener(new OnItemClickListener() {
 
             public void onItemClick(AdapterView<?> arg0, View arg1, int position,
@@ -55,6 +68,8 @@ public class MainActivity extends ActionBarActivity {
                 sendMessage(arg1, position);
             }
         });
+
+        //Now we set the images from the resources section
         ((ImageView) findViewById(R.id.imageView)).setImageResource(R.drawable.p1);
         ((ImageView) findViewById(R.id.imageView2)).setImageResource(R.drawable.p2);
         ((ImageView) findViewById(R.id.imageView3)).setImageResource(R.drawable.p3);
@@ -73,29 +88,13 @@ public class MainActivity extends ActionBarActivity {
         Collections.sort(Events);
     }
 
-    private void fillListView() {
-        String s = "";
-        boolean tryAgain = true;
-        while (tryAgain) {
-            try {
-                FileInputStream fis = openFileInput("cal.csv");
-                Scanner scan = new Scanner(fis);
-                while (scan.hasNextLine()) {
-                    s += scan.nextLine() + "\n";
-                }
-                tryAgain = false;
-            } catch (Exception e) {
-                makeCSV();
-            }
-        }
-        String[] fileLines = s.split("\n");
-        Events = new ArrayList<>(fileLines.length);
-        for (String str : fileLines) {
-            if (str.split(",,").length == 6) Events.add(new MHSEvent(str.split(",,")));
-        }
-        while (Events.size() == 0) {
-            makeCSV();
-            tryAgain = true;
+    private void readFileIntoArrayList() {
+        Events = new ArrayList<>(0);
+        int count = 0;
+        while (Events.size() == 0 && count < 3) {
+            String s = "";
+            boolean tryAgain = true;
+            String[] fileLines;
             while (tryAgain) {
                 try {
                     FileInputStream fis = openFileInput("cal.csv");
@@ -110,10 +109,30 @@ public class MainActivity extends ActionBarActivity {
             }
             fileLines = s.split("\n");
             for (String str : fileLines) {
-                if (str.split(",,").length == 6) Events.add(new MHSEvent(str.split(",,")));
+                if (str.split(",,").length == 7) {
+                    Events.add(new MHSEvent(str.split(",,")));
+                }
             }
+            orderAndRemoveEvents();
+            if (Events.size() == 0) {
+                Toast.makeText(this, R.string.eventError, Toast.LENGTH_SHORT);
+                makeCSV();
+            }
+            count++;
         }
-        orderAndRemoveEvents();
+        if (count >= 3 && Events.size() == 0) {
+            Toast.makeText(this, "Something bad happened and we cannot load events.", Toast.LENGTH_LONG);
+            Events = new ArrayList<>();
+            Events.add(new MHSEvent("Cannot load events",
+                    "Something bad happened and we cannot load events. Please check your date and time settings and try an update.",
+                    new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none",
+                    new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none", "none"));
+        }
+
+    }
+
+    private void fillListView() {
+        readFileIntoArrayList();
         List<Map<String, String>> data = new ArrayList<>();
         for (MHSEvent item : Events) {
             Map<String, String> datum = new HashMap<>(2);
@@ -130,11 +149,9 @@ public class MainActivity extends ActionBarActivity {
         adapter.notifyDataSetChanged();
     }
 
-    //TODO Make the CSV with real events
+    //TODO Finish the CSV
     private void makeCSV() {
-        Scanner s;
-
-        s = new Scanner(new InputStreamReader(getResources().openRawResource(R.raw.cal)));
+        Scanner s = new Scanner(new InputStreamReader(getResources().openRawResource(R.raw.cal)));
 
 
         String cal = "";
@@ -165,9 +182,7 @@ public class MainActivity extends ActionBarActivity {
 
                     @Override
                     protected Void doInBackground(Void... params) {
-                        int count;
                         try {
-
                             String fileName = "cal.csv";
                             URL website = new URL(downloadURL);
                             URLConnection connection = website.openConnection();
@@ -176,6 +191,7 @@ public class MainActivity extends ActionBarActivity {
                             FileOutputStream outputStream;
                             outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
                             byte data[] = new byte[1024];
+                            int count;
                             while ((count = input.read(data)) != -1) {
                                 // writing data to file
                                 outputStream.write(data, 0, count);
@@ -195,18 +211,19 @@ public class MainActivity extends ActionBarActivity {
                     @Override
                     protected void onPostExecute(Void result) {
                         if (fail) {
-                            Toast.makeText(a, "Could not download event list.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(a, R.string.update_failed,
+                                    Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(a, "Update completed.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(a, R.string.update_success,
+                                    Toast.LENGTH_SHORT).show();
+                            fillListView();
                         }
-                        fillListView();
                         progress.dismiss();
                     }
                 };
                 task.execute((Void[]) null);
             }
         }).start();
-
     }
 
     @Override
@@ -231,8 +248,6 @@ public class MainActivity extends ActionBarActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-
-
     }
 
     public void sendMessage(View view, int arrPOS) {

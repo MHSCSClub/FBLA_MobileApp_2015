@@ -7,13 +7,15 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 public class eventDummy extends ActionBarActivity {
-    MHSEvent e;
+    private MHSEvent e;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +28,10 @@ public class eventDummy extends ActionBarActivity {
         dateTextView.setText(e.getEventDates());
         TextView descriptionTextView = (TextView) findViewById(R.id.descriptionView);
         descriptionTextView.setText(e.getEventDescription());
+        Button emailBtn = (Button) findViewById(R.id.emailButton);
+        emailBtn.setClickable(e.showEmail());
+        emailBtn.setVisibility(e.showEmail() ? View.VISIBLE : View.GONE);
+        Log.d("EMAIL-VIS", e.showEmail() + "");
     }
 
     public void sendMessage(View v) {

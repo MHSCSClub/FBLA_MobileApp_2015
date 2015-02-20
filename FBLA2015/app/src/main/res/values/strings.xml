@@ -8,5 +8,7 @@
         <item>Cannot populate list.</item>
     </string-array>
     <string name="title_activity_event_dummy">eventDummy</string>
-
+    <string name="update_success">Update Completed</string>
+    <string name="update_failed">Unable to download event list. Please check your connection.</string>
+    <string name="eventError">Downloaded file was invalid. Defaults restored.</string>
 </resources>
