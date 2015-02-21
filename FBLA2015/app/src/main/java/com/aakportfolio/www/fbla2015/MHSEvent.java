@@ -3,6 +3,7 @@ package com.aakportfolio.www.fbla2015;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.GregorianCalendar;
 import java.util.regex.Pattern;
 
 /**
@@ -10,27 +11,49 @@ import java.util.regex.Pattern;
  * Created by Andrew on 1/19/2015.
  */
 
-//TODO: implement the functionality to disable the email button, include email in constructor and file and eventDummy
 public class MHSEvent implements Serializable, Comparable {
     private String eventName = "Untitled Event";
     private String eventDescription = "No Description";
     private String contactEmail = "events-temp@mamkschools.org";
-    private int MM;
-    private int DD;
-    private int YYYY;
+    private int MM = 00;
+    private int DD = 00;
+    private int YYYY = 00;
     private String eventStartDate;
     private String eventEndDate;
+    private long startMillisec;
+    private long endMillisec;
+    boolean isAllDay;
 
 
     public MHSEvent(String name, String Description, String startDate, String startTime, String endDate, String endTime, String email) {
         eventName = name;
+        startMillisec = 0;
+        endMillisec = 0;
+        isAllDay = true;
         eventDescription = eventName + "\n";
         if (!startTime.trim().equals("none")) {
             if (startTime.trim().equals("allday")) {
                 eventDescription += "All day event" + "\n";
             } else {
                 eventDescription += "Start time: " + startTime + "\n";
+                {
+                    isAllDay = false;
+                    long hours = Long.parseLong(startTime.split(":")[0]);
+                    long minutes = Long.parseLong(startTime.split(":")[1].split(" ")[0]);
+                    String ampm = startTime.substring(startTime.indexOf(" ") + 1);
+                    if (ampm.equals("PM")) hours += 12L;
+                    minutes += hours * 60L;
+                    long seconds = minutes * 60L;
+                    startMillisec = seconds * 1000L;
+                }
                 if (!endTime.trim().equals("none")) {
+                    long hours = Long.parseLong(endTime.split(":")[0]);
+                    long minutes = Long.parseLong(endTime.split(":")[1].split(" ")[0]);
+                    String ampm = startTime.substring(endTime.indexOf(" ") + 1);
+                    if (ampm.equals("PM")) hours += 12L;
+                    minutes += hours * 60L;
+                    long seconds = minutes * 60L;
+                    endMillisec = seconds * 1000L;
                     eventDescription += "End Time: " + endTime + "\n";
                 }
             }
@@ -103,7 +126,9 @@ public class MHSEvent implements Serializable, Comparable {
     }
 
     public String getEventDates() {
-        return "Starts: " + eventStartDate + "\n" + "Ends: " + eventEndDate;
+        return eventStartDate.equals(eventEndDate)
+                ? "Starts: " + eventStartDate
+                : "Starts: " + eventStartDate + "\n" + "Ends: " + eventEndDate;
     }
 
     public String getEventStartDate() {
@@ -141,5 +166,34 @@ public class MHSEvent implements Serializable, Comparable {
                 }
             }
         }
+    }
+
+    public GregorianCalendar getCalStart() {
+        return new GregorianCalendar(YYYY, MM, DD);
+    }
+
+    public GregorianCalendar getCalEnd() {
+        try {
+            int MM1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[0]),
+                    DD1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[1]),
+                    YYYY1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[2]);
+            return new GregorianCalendar(YYYY1, MM1, DD1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new GregorianCalendar(YYYY, MM, DD);
+        }
+
+    }
+
+    public long startMS() {
+        return startMillisec;
+    }
+
+    public long endMS() {
+        return endMillisec;
+    }
+
+    public boolean getIsAllDay() {
+        return isAllDay;
     }
 }

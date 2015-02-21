@@ -11,4 +11,8 @@
     <string name="update_success">Update Completed</string>
     <string name="update_failed">Unable to download event list. Please check your connection.</string>
     <string name="eventError">Downloaded file was invalid. Defaults restored.</string>
+    <string name="emailBtn">Email Organizer</string>
+    <string name="shareBtn">Share Event</string>
+    <string name="calBtn">Add to Calender</string>
+    <string name="noEvents">Something bad happened and we cannot load events.</string>
 </resources>
