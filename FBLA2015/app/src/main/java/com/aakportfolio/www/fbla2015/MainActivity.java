@@ -9,12 +9,17 @@ package com.aakportfolio.www.fbla2015;
 
 //Import Section
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -66,7 +71,19 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setTitle(R.string.title_activity_main);     //Set title
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setIcon(R.drawable.ic_launcher);
+    }
 
+    /**
+     * This method is called after onCreate
+     * We will fill/refill the listview here so if user
+     * resumes app the next day, old events will be purged.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
         LV = (ListView) findViewById(R.id.listView); //Get our listview so we can edit it
         fillListView(); //Read in our event file, and fill list view
 
@@ -130,7 +147,9 @@ public class MainActivity extends ActionBarActivity {
         while (Events.size() == 0 && count < 3) {
             String[] fileLines;
             fileLines = readLines().split("\n");
-            for (String str : fileLines) {
+            for (int i = 0; i < fileLines.length; i++) {
+                Log.d("LINE=", "" + i);
+                String str = fileLines[i];
                 if (str.split(",,").length == 7) {
                     Events.add(new MHSEvent(str.split(",,")));
                 }
@@ -152,6 +171,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
     }
+
 
     public void fillListView() {
         readFileIntoArrayList();
@@ -255,6 +275,19 @@ public class MainActivity extends ActionBarActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    private void showAbout() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.about_message)
+                .setTitle(R.string.about_title);
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // User clicked OK button
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -264,10 +297,43 @@ public class MainActivity extends ActionBarActivity {
         switch (id) {
             case R.id.action_update:
                 update();
-                return super.onOptionsItemSelected(item);
+                return true;
+            case R.id.action_about:
+                showAbout();
+                return true;
+            case R.id.action_facebook:
+                try {
+                    openURL("http://www.facebook.com/MamaroneckPublicSchools");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return true;
+            case R.id.action_twitter:
+                try {
+                    openURL("twitter://twitter.com/MamaroneckED");
+                } catch (Exception e) {
+                    try {
+                        openURL("http://www.twitter.com/MamaroneckED");
+                    } catch (Exception e1) {
+                        e.printStackTrace();
+                        e1.printStackTrace();
+                    }
+                }
+                return true;
+            case R.id.action_website:
+                try {
+                    openURL("http://mhs.mamkschools.org/");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    public void openURL(String url) throws Exception {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(browserIntent);
+    }
 }

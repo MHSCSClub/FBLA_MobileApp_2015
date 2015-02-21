@@ -12,17 +12,18 @@ import java.util.regex.Pattern;
  */
 
 public class MHSEvent implements Serializable, Comparable {
+    boolean isAllDay = true;
+    //Instance variables. They have some defauslts
     private String eventName = "Untitled Event";
     private String eventDescription = "No Description";
     private String contactEmail = "events-temp@mamkschools.org";
     private int MM = 00;
     private int DD = 00;
     private int YYYY = 00;
-    private String eventStartDate;
-    private String eventEndDate;
-    private long startMillisec;
-    private long endMillisec;
-    boolean isAllDay;
+    private String eventStartDate = "00/00/0000";
+    private String eventEndDate = "00/00/0000";
+    private long startMillisec = 0;
+    private long endMillisec = 0;
 
 
     public MHSEvent(String name, String Description, String startDate, String startTime, String endDate, String endTime, String email) {
@@ -80,7 +81,11 @@ public class MHSEvent implements Serializable, Comparable {
         contactEmail = email.trim();
     }
 
-
+    /**
+     * This constructor takes an array (from String.split) and passes it to the main constructor.
+     *
+     * @param inArr Array of All the same paramaters of main constructor
+     */
     public MHSEvent(String[] inArr) {
         this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5], inArr[6]);
     }
@@ -100,6 +105,7 @@ public class MHSEvent implements Serializable, Comparable {
     public boolean showEmail() {
         return !contactEmail.equals("none");
     }
+
     /**
      * Compares date and sees if should be displayed.
      *
@@ -114,7 +120,7 @@ public class MHSEvent implements Serializable, Comparable {
                     DD1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[1]),
                     YYYY1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[2]);
             if (nowYYYY > YYYY1) return false;
-            return nowYYYY >= YYYY1 && (nowYYYY != YYYY1 || nowMM <= MM1 && nowDD <= DD1);
+            return nowYYYY >= YYYY1 && ((nowYYYY != YYYY1) || ((nowMM < MM1) || (nowMM <= MM1 && nowDD <= DD1)));
         } catch (Exception e) {
             e.printStackTrace();
             return false;

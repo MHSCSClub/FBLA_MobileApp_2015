@@ -1,9 +1,32 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:mhsEvents="http://schemas.android.com/apk/res-auto">
+    xmlns:mhsEvents="http://schemas.android.com/apk/res-auto">
 
     <!-- Update, should appear as action button -->
-    <item android:id="@+id/action_update"
+    <item
+        android:id="@+id/action_update"
         android:icon="@drawable/ic_update"
-        android:title="@string/update"
+        android:title="@string/action_update"
         mhsEvents:showAsAction="ifRoom" />
+
+    <!-- Website, Always hidden -->
+    <item
+        android:id="@+id/action_website"
+        android:title="@string/action_website"
+        mhsEvents:showAsAction="never" />
+    <!-- Facebook Page, Always hidden -->
+    <item
+        android:id="@+id/action_facebook"
+        android:title="@string/action_facebook"
+        mhsEvents:showAsAction="never" />
+    <!-- Twitter Page, Always hidden -->
+    <item
+        android:id="@+id/action_twitter"
+        android:title="@string/action_twitter"
+        mhsEvents:showAsAction="never" />
+    <!-- About, Always hidden -->
+    <item
+        android:id="@+id/action_about"
+        android:title="@string/action_about"
+        mhsEvents:showAsAction="never" />
+
 </menu>

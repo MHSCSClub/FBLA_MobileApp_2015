@@ -2,8 +2,15 @@
 <resources>
 
     <string name="app_name">MHS Events</string>
-    <string name="update">Update List</string>
-    <string name="title_activity_main">MHS Event List</string>
+    <string name="action_update">Update List</string>
+    <string name="title_activity_main"> MHS Event List</string>
+    <string name="action_twitter">Go to Twitter page</string>
+    <string name="action_facebook">Go to Facebook page</string>
+    <string name="action_website">Go to MHS website</string>
+    <string name="action_about">About</string>
+    <string name="about_title">About MHS Event List</string>
+    <string name="about_message">MHS Event List.\nCopyright © Andrew Katz, 2015.\nAll Rights Reserved.</string>
+    <string name="ok">OK</string>
     <string-array name="list">
         <item>Cannot populate list.</item>
     </string-array>
