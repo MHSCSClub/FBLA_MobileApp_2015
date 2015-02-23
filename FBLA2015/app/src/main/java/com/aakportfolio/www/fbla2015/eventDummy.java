@@ -77,10 +77,14 @@ public class eventDummy extends ActionBarActivity implements View.OnClickListene
                 break;
             case R.id.shareBtn:
                 String message = "Check out this event at MHS: " + e.getEventName() + " (" + e.getEventStartDate() + ")";
-                Intent share = new Intent(Intent.ACTION_SEND);
-                share.setType("text/plain");
-                share.putExtra(Intent.EXTRA_TEXT, message);
-                startActivity(Intent.createChooser(share, "How would you like to share the event?"));
+                try {
+                    Intent share = new Intent(Intent.ACTION_SEND);
+                    share.setType("text/plain");
+                    share.putExtra(Intent.EXTRA_TEXT, message);
+                    startActivity(Intent.createChooser(share, "Please choose an application to share event with"));
+                } catch (Exception e) {
+                    Toast.makeText(this, "No sharable applications found...", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.calBtn:
                 try {
@@ -91,12 +95,12 @@ public class eventDummy extends ActionBarActivity implements View.OnClickListene
                     calIntent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, e.getIsAllDay());
                     calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
                             e.getCalStart().getTimeInMillis() + e.startMS());
-                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,   //TODO: It does not seem to listen to this!
                             e.getCalEnd().getTimeInMillis() + e.endMS());
                     startActivity(calIntent);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Toast.makeText(this, "Error creating calender  event. Is calender installed and working?", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error creating calendar  event. Is calendar installed and working?", Toast.LENGTH_SHORT).show();
                 }
                 break;
             default:

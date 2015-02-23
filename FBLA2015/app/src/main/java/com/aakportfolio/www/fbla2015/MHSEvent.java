@@ -133,7 +133,7 @@ public class MHSEvent implements Serializable, Comparable {
 
     public String getEventDates() {
         return eventStartDate.equals(eventEndDate)
-                ? "Starts: " + eventStartDate
+                ? "Date: " + eventStartDate
                 : "Starts: " + eventStartDate + "\n" + "Ends: " + eventEndDate;
     }
 

@@ -31,7 +31,8 @@
                 android:layout_height="match_parent"
                 android:id="@+id/imageView"
                 android:src="@drawable/p1"
-                android:adjustViewBounds="true" />
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop" />
 
             <ImageView
                 android:layout_width="match_parent"
@@ -39,14 +40,32 @@
                 android:id="@+id/imageView2"
                 android:src="@drawable/p2"
                 android:adjustViewBounds="true"
-                android:maxHeight="128dp" />
+                android:scaleType="centerCrop" />
 
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/imageView3"
                 android:src="@drawable/p3"
-                android:adjustViewBounds="true" />
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/imageView4"
+                android:src="@drawable/p4"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/imageView5"
+                android:src="@drawable/p5"
+                android:adjustViewBounds="true"
+                android:cropToPadding="false"
+                android:scaleType="centerCrop" />
 
         </ViewFlipper>
 
@@ -59,7 +78,6 @@
             android:layout_weight="1" />
 
     </LinearLayout>
-
 
 
 </RelativeLayout>

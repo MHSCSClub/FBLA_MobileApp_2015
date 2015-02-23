@@ -20,6 +20,6 @@
     <string name="eventError">Downloaded file was invalid. Defaults restored.</string>
     <string name="emailBtn">Email Organizer</string>
     <string name="shareBtn">Share Event</string>
-    <string name="calBtn">Add to Calender</string>
+    <string name="calBtn">Add to Calendar</string>
     <string name="noEvents">Something bad happened and we cannot load events.</string>
 </resources>

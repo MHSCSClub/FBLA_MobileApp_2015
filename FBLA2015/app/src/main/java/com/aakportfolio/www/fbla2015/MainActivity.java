@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 //End of Imports
-
+//TODO Comment app!
 public class MainActivity extends ActionBarActivity {
 
     //File download URL. Can be changed to the school if needed
@@ -61,6 +61,9 @@ public class MainActivity extends ActionBarActivity {
     //ListView on main page
     private ListView LV;
 
+    //This string allows us to update if app is resumed on different day.
+    private String lastUpdateDate;
+
     /**
      * This is the starting method (like main)
      *
@@ -74,6 +77,7 @@ public class MainActivity extends ActionBarActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(true);
         actionBar.setIcon(R.drawable.ic_launcher);
+        lastUpdateDate = "";
     }
 
     /**
@@ -84,19 +88,22 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        LV = (ListView) findViewById(R.id.listView); //Get our listview so we can edit it
-        fillListView(); //Read in our event file, and fill list view
+        if (!new SimpleDateFormat("MM/dd/yyyy").format(new Date()).equals(lastUpdateDate)) {
+            lastUpdateDate = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
+            LV = (ListView) findViewById(R.id.listView); //Get our listview so we can edit it
+            fillListView(); //Read in our event file, and fill list view
 
-        //This code fragment allows us to detect selections
-        LV.setOnItemClickListener(new OnItemClickListener() {
+            //This code fragment allows us to detect selections
+            LV.setOnItemClickListener(new OnItemClickListener() {
 
-            public void onItemClick(AdapterView<?> arg0, View arg1, int position,
-                                    long arg3) {
-                Intent intent = new Intent(MainActivity.this, eventDummy.class); //Get next activity
-                intent.putExtra("event", Events.get(position)); //Pass selected event
-                startActivity(intent);  //Start the activity
-            }
-        });
+                public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+                                        long arg3) {
+                    Intent intent = new Intent(MainActivity.this, eventDummy.class); //Get next activity
+                    intent.putExtra("event", Events.get(position)); //Pass selected event
+                    startActivity(intent);  //Start the activity
+                }
+            });
+        }
     }
 
     /**
@@ -214,56 +221,50 @@ public class MainActivity extends ActionBarActivity {
         final ProgressDialog progress = ProgressDialog.show(this, "Downloading updated events...",
                 "Please wait, downloading...", true);
         final MainActivity a = this;
-        new Thread(new Runnable() {
+
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+            private boolean fail = true;
+
             @Override
-            public void run() {
-                // do the thing that takes a long time
-                AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
-                    private boolean fail = true;
+            protected Void doInBackground(Void... params) {
+                int count;
+                try {
 
-                    @Override
-                    protected Void doInBackground(Void... params) {
-                        int count;
-                        try {
-
-                            String fileName = "cal.csv";
-                            URL website = new URL(downloadURL);
-                            URLConnection connection = website.openConnection();
-                            connection.connect();
-                            InputStream input = new BufferedInputStream(website.openStream());
-                            FileOutputStream outputStream;
-                            outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
-                            byte data[] = new byte[1024];
-                            while ((count = input.read(data)) != -1) {
-                                // writing data to file
-                                outputStream.write(data, 0, count);
-                            }
-                            outputStream.flush();
-                            outputStream.close();
-                            input.close();
-                            fail = false;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            fail = true;
-                        }
-                        return null;
+                    String fileName = "cal.csv";
+                    URL website = new URL(downloadURL);
+                    URLConnection connection = website.openConnection();
+                    connection.connect();
+                    InputStream input = new BufferedInputStream(website.openStream());
+                    FileOutputStream outputStream;
+                    outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
+                    byte data[] = new byte[1024];
+                    while ((count = input.read(data)) != -1) {
+                        // writing data to file
+                        outputStream.write(data, 0, count);
                     }
-
-                    @Override
-                    protected void onPostExecute(Void result) {
-                        if (fail) {
-                            Toast.makeText(a, "Could not download event list.", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(a, "Update completed.", Toast.LENGTH_SHORT).show();
-                        }
-                        fillListView();
-                        progress.dismiss();
-                    }
-                };
-                task.execute((Void[]) null);
+                    outputStream.flush();
+                    outputStream.close();
+                    input.close();
+                    fail = false;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    fail = true;
+                }
+                return null;
             }
-        }).start();
 
+            @Override
+            protected void onPostExecute(Void result) {
+                if (fail) {
+                    Toast.makeText(a, "Could not download event list.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(a, "Update completed.", Toast.LENGTH_SHORT).show();
+                }
+                fillListView();
+                progress.dismiss();
+            }
+        };
+        task.execute((Void[]) null);
     }
 
     @Override
