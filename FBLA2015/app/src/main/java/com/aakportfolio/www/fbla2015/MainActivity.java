@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 //End of Imports
-//TODO Comment app!
+
 public class MainActivity extends ActionBarActivity {
 
     //File download URL. Can be changed to the school if needed
@@ -66,7 +66,7 @@ public class MainActivity extends ActionBarActivity {
     /**
      * This is the starting method (like main)
      *
-     * @param savedInstanceState
+     * @param savedInstanceState Pass to super
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -324,8 +324,8 @@ public class MainActivity extends ActionBarActivity {
 
             /**
              * Main background method. This is where the download happens
-             * @param params
-             * @return
+             * @param params   Required
+             * @return null
              */
             @Override
             protected Void doInBackground(Void... params) {
@@ -369,7 +369,7 @@ public class MainActivity extends ActionBarActivity {
 
             /**
              * This method is called when background task is done
-             * @param result
+             * @param result  we do not care
              */
             @Override
             protected void onPostExecute(Void result) {
@@ -397,8 +397,8 @@ public class MainActivity extends ActionBarActivity {
     /**
      * Standard android code for options menu
      *
-     * @param menu
-     * @return
+     * @param menu menu of app
+     * @return super's return
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -437,8 +437,8 @@ public class MainActivity extends ActionBarActivity {
     /**
      * This method deals with action bar selections
      *
-     * @param item
-     * @return
+     * @param item selected item
+     * @return whether action was preformed
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -481,7 +481,6 @@ public class MainActivity extends ActionBarActivity {
      * Open a URL
      *
      * @param url URL to open
-     * @throws Exception
      */
     public boolean openURL(String url) {
         try {
