@@ -1,43 +1,74 @@
+//Filename: MHSEvent.java
+/**
+ * This is a class for each event
+ * This object is for storing an event (1 line from the CSV file)
+ * Created by Andrew on 1/19/2015.
+ * @author Andrew Katz
+ * @version 1.0
+ */
+
 package com.aakportfolio.www.fbla2015;
+
+//Import section
 
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.GregorianCalendar;
 import java.util.regex.Pattern;
-
-/**
- * This object is for storing an event (1 line from the CSV file)
- * Created by Andrew on 1/19/2015.
- */
+//End of imports
 
 public class MHSEvent implements Serializable, Comparable {
     boolean isAllDay = true;
-    //Instance variables. They have some defauslts
+    //Instance variables. They have some defaults here for purposes of examples
+
+    //Event name
     private String eventName = "Untitled Event";
+
+    //Event Description
     private String eventDescription = "No Description";
+
+    //Email Address
     private String contactEmail = "events-temp@mamkschools.org";
+
+    //Date variables
     private int MM = 00;
     private int DD = 00;
-    private int YYYY = 00;
+    private int YYYY = 0000;
     private String eventStartDate = "00/00/0000";
     private String eventEndDate = "00/00/0000";
+
+    //Millisecond variables
     private long startMillisec = 0;
     private long endMillisec = 0;
 
-
-    public MHSEvent(String name, String Description, String startDate, String startTime, String endDate, String endTime, String email) {
-        eventName = name;
-        startMillisec = 0;
-        endMillisec = 0;
-        isAllDay = true;
-        eventDescription = eventName + "\n";
-        if (!startTime.trim().equals("none")) {
-            if (startTime.trim().equals("allday")) {
-                eventDescription += "All day event" + "\n";
+    /**
+     * Constructor for event.
+     *
+     * @param name        Event name
+     * @param Description Event Description
+     * @param startDate   Event date (MM/DD/YYYY)
+     * @param startTime   Start time for event (HH:MM AMPM)
+     * @param endDate     Ending date of event (MM/DD/YYYY)
+     * @param endTime     End time (HH:MM AMPM)
+     * @param email       email address
+     */
+    public MHSEvent(String name, String Description, String startDate,
+                    String startTime, String endDate, String endTime, String email) {
+        eventName = name;                                                       //Set Event Name
+        startMillisec = 0;                                                      //Zero millisec
+        endMillisec = 0;                                                        //Zero millisec
+        isAllDay = true;                                                        //Set to isAllDay
+        eventDescription = eventName + "\n";                                    //Start desc. with
+        //name
+        if (!startTime.trim().equals("none")) {                                 //If we have start
+            if (startTime.trim().equals("allday")) {                            //if allday...
+                eventDescription += "All day event" + "\n";                     //Note in desc.
             } else {
-                eventDescription += "Start time: " + startTime + "\n";
-                {
+
+
+                try {
+                    eventDescription += "Start time: " + startTime + "\n";
                     isAllDay = false;
                     long hours = Long.parseLong(startTime.split(":")[0]);
                     long minutes = Long.parseLong(startTime.split(":")[1].split(" ")[0]);
@@ -46,16 +77,24 @@ public class MHSEvent implements Serializable, Comparable {
                     minutes += hours * 60L;
                     long seconds = minutes * 60L;
                     startMillisec = seconds * 1000L;
-                }
+                } catch (Exception e) {
+                    //Just use the defaults, and treat it as no start time if invalid
+                    }
+
+
                 if (!endTime.trim().equals("none")) {
-                    long hours = Long.parseLong(endTime.split(":")[0]);
-                    long minutes = Long.parseLong(endTime.split(":")[1].split(" ")[0]);
-                    String ampm = startTime.substring(endTime.indexOf(" ") + 1);
-                    if (ampm.equals("PM")) hours += 12L;
-                    minutes += hours * 60L;
-                    long seconds = minutes * 60L;
-                    endMillisec = seconds * 1000L;
-                    eventDescription += "End Time: " + endTime + "\n";
+                    try {
+                        long hours = Long.parseLong(endTime.split(":")[0]);
+                        long minutes = Long.parseLong(endTime.split(":")[1].split(" ")[0]);
+                        String ampm = startTime.substring(endTime.indexOf(" ") + 1);
+                        if (ampm.equals("PM")) hours += 12L;
+                        minutes += hours * 60L;
+                        long seconds = minutes * 60L;
+                        endMillisec = seconds * 1000L;
+                        eventDescription += "End Time: " + endTime + "\n";
+                    } catch (Exception e) {
+                        //Leave it blank, treat it as if there is no end time
+                    }
                 }
             }
         }

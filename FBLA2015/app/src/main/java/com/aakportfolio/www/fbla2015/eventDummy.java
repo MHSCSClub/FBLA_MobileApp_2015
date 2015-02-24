@@ -1,4 +1,13 @@
+//Filename: eventDummy.java
+/**
+ * This is the activity for each event in this android app.
+ * Upon selecting an event, this loads, and is changed based on the event.
+ * @author Andrew Katz
+ * @version 1.0
+ */
 package com.aakportfolio.www.fbla2015;
+
+//Import section
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -12,108 +21,200 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
+//End of import section
 
 public class eventDummy extends ActionBarActivity implements View.OnClickListener {
-    private MHSEvent e;
+    //Event passed from MainActivity
+    private MHSEvent myEvent;
 
+    /**
+     * This method runs on launch of the activity
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Intent intent = getIntent();
-        setContentView(R.layout.activity_event_dummy);
-        e = (MHSEvent) intent.getSerializableExtra("event");
-        setTitle(e + "");
-        TextView dateTextView = (TextView) findViewById(R.id.dateView);
-        dateTextView.setText(e.getEventDates());
-        TextView descriptionTextView = (TextView) findViewById(R.id.descriptionView);
-        descriptionTextView.setText(e.getEventDescription());
-        Button emailBtn = (Button) findViewById(R.id.emailButton);
-        emailBtn.setClickable(e.showEmail());
-        emailBtn.setVisibility(e.showEmail() ? View.VISIBLE : View.GONE);
-        emailBtn.setOnClickListener(this);
-        Button shareBtn = (Button) findViewById(R.id.shareBtn);
-        shareBtn.setOnClickListener(this);
-        Button calBtn = (Button) findViewById(R.id.calBtn);
-        calBtn.setOnClickListener(this);
+        super.onCreate(savedInstanceState);                     //Let android do the normal things
+        Intent intent = getIntent();                            //Get our intent
+        setContentView(R.layout.activity_event_dummy);          //Set our content to XML
+        myEvent = (MHSEvent) intent.getSerializableExtra("event");    //Get our event
+        setTitle(myEvent.toString());                                       //Set title to event title
+        TextView dateTextView =                                 //Date text view
+                (TextView) findViewById(R.id.dateView);         //Get date textview from resources
+        dateTextView.setText(myEvent.getEventDates());                //Set dateview text from event
+        TextView descriptionTextView =                          //Textview for description
+                (TextView) findViewById(R.id.descriptionView);  //Get textview from resources
+        descriptionTextView.setText(myEvent.getEventDescription());   //Set text to event description
+        Button emailBtn =                                       //Email button
+                (Button) findViewById(R.id.emailButton);        //Get from resources
+        emailBtn.setClickable(myEvent.showEmail());                   //See if it should exist
+        emailBtn.setVisibility(myEvent.showEmail() ?                  //Set viability...
+                View.VISIBLE : View.GONE);                      //based on clickability
+        emailBtn.setOnClickListener(this);                      //Set the listener to us
+        Button shareBtn = (Button) findViewById(R.id.shareBtn); //Get share button from resources
+        shareBtn.setOnClickListener(this);                      //Set listener to us
+        Button calBtn = (Button) findViewById(R.id.calBtn);     //Get calender button
+        calBtn.setOnClickListener(this);                        //Set the listener to us
     }
 
+    /**
+     * onClick method handles button clicks
+     * @param v
+     */
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.emailButton:
-                new AlertDialog.Builder(this)
-                        .setTitle("Email Organizer")
-                        .setMessage("Are you sure you want to send an email to the event organizer (email address: " + e.getContactEmail() + ")?")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                if (!isGMailInstalled()) {
-                                Toast.makeText(eventDummy.this,
-                                        "No email clients installed.\nYou may manually email this address: " + e.getContactEmail(),
-                                        Toast.LENGTH_LONG).show();
-                                } else {
-                                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
-                                    emailIntent.setData(Uri.parse("mailto:" + e.getContactEmail()));
-                                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Questions about an event: " + e);
-                                    emailIntent.putExtra(Intent.EXTRA_TEXT, "Please explain your questions here.");
-                                    try {
-                                        startActivity(Intent.createChooser(emailIntent, "Please select email application"));
-                                    } catch (android.content.ActivityNotFoundException ex) {
-                                        Toast.makeText(eventDummy.this,
-                                                "No email clients installed.\nYou may manually email this address: " + e.getContactEmail(),
-                                                Toast.LENGTH_LONG).show();
-                                    }
-                            }
-                        }
-                        })
-                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_email)
-                        .show();
-                break;
-            case R.id.shareBtn:
-                String message = "Check out this event at MHS: " + e.getEventName() + " (" + e.getEventStartDate() + ")";
-                try {
-                    Intent share = new Intent(Intent.ACTION_SEND);
-                    share.setType("text/plain");
-                    share.putExtra(Intent.EXTRA_TEXT, message);
-                    startActivity(Intent.createChooser(share, "Please choose an application to share event with"));
-                } catch (Exception e) {
-                    Toast.makeText(this, "No sharable applications found...", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case R.id.calBtn:
-                try {
-                    Intent calIntent = new Intent(Intent.ACTION_INSERT);
-                    calIntent.setType("vnd.android.cursor.item/event");
-                    calIntent.putExtra(CalendarContract.Events.TITLE, e.getEventName());
-                    calIntent.putExtra(CalendarContract.Events.DESCRIPTION, e.getEventDescription());
-                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, e.getIsAllDay());
-                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
-                            e.getCalStart().getTimeInMillis() + e.startMS());
-                    calIntent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME,   //TODO: It does not seem to listen to this!
-                            e.getCalEnd().getTimeInMillis() + e.endMS());
-                    startActivity(calIntent);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Error creating calendar  event. Is calendar installed and working?", Toast.LENGTH_SHORT).show();
-                }
-                break;
+        switch (v.getId()) {                                    //Get id of view
+            case R.id.emailButton:                              //If email button...
+                doEmail();                                      //Do email things...
+                break;                                          //then end!
+            case R.id.shareBtn:                                 //If share button...
+                doShare();                                      //Do share things...
+                break;                                          //then end!
+            case R.id.calBtn:                                   //If calender button...
+                doCal();                                        //do cal things...
+                break;                                          //then end!
             default:
                 //Do nothing
         }
     }
 
-    public boolean isGMailInstalled() {
+    /**
+     * This method handles the email
+     */
+    private void doEmail() {
+        new AlertDialog.Builder(this)                           //Create an alert dialog...
+                .setTitle("Email Organizer")                    //With email organizer title
+                .setMessage("Are you sure you want to send " +  //And question...
+                        "an email to the event organizer " +    //for the user
+                        "(email address: " +                    //...
+                        myEvent.getContactEmail() + ")?")             //...
+                .setPositiveButton(android.R.string.yes,        //And Yes button
+                        new DialogInterface.OnClickListener() { //With an onClick...
+                            public void onClick(DialogInterface dialog, //to send email
+                                                int which) {
+
+                                if (!isGMailInstalled()) {              //Check if GMail is installed
+                                    Toast.makeText(eventDummy.this,     //Alert the user if it isn't
+                                            "No email clients" +
+                                                    " installed" +
+                                                    ".\nYou may " +
+                                                    "manually " +
+                                                    "email this " +
+                                                    "address: " +
+                                                    myEvent.getContactEmail(),
+                                            Toast.LENGTH_LONG).show();
+                                } else {                                //If it is installed...
+                                    Intent emailIntent =
+                                            new Intent(Intent
+                                                    .ACTION_SENDTO);    //Create send to intent
+                                    emailIntent.setData(
+                                            Uri.parse("mailto:" + myEvent
+                                                    .getContactEmail()));//Get contact email
+                                    emailIntent.putExtra(
+                                            Intent.EXTRA_SUBJECT,
+                                            "Questions about an " +
+                                                    "event: " + myEvent);     //Set default data
+                                    emailIntent.putExtra(Intent
+                                            .EXTRA_TEXT, "Please " +
+                                            "explain your questions" +
+                                            " here.");                  //...
+                                    try {
+                                        startActivity(Intent
+                                                .createChooser(         //Create email app chooser
+                                                        emailIntent,
+                                                        "Please " +
+                                                                "select " +
+                                                                "email" +
+                                                                " application"));
+                                    } catch (android.content
+                                            .ActivityNotFoundException ex) {
+                                        Toast.makeText(eventDummy.this,
+                                                "No email clients " +
+                                                        "installed.\nYou" +
+                                                        " may manually email " +
+                                                        "this address: "
+                                                        + myEvent.getContactEmail(),  //Notify user if cannot email
+                                                Toast.LENGTH_LONG)
+                                                .show();
+                                    }
+                                }
+                            }
+                        })
+                .setNegativeButton(android.R.string.no,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface
+                                                        dialog,
+                                                int which) {
+                                // do nothing
+                            }
+                        })
+                .setIcon(android.R.drawable.ic_dialog_email)    //Set dialog icon
+                .show();                                        //and show dialog
+    }
+
+    private void doShare() {
+        String message = "Check out this event at MHS: "
+                + myEvent.getEventName() + " (" +
+                myEvent.getEventStartDate() + ")";                    //Share event message
         try {
-            getPackageManager().getApplicationInfo("com.google.android.gm", 0);
-            return true;
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
+            Intent share = new Intent(Intent.ACTION_SEND);      //Try to share event
+            share.setType("text/plain");
+            share.putExtra(Intent.EXTRA_TEXT, message);
+            startActivity(Intent.createChooser(share,
+                    "Please choose an application to " +
+                            "share event with"));               //Ask how to share
+        } catch (Exception e) {
+            Toast.makeText(this, "No sharable " +
+                            "applications found...",
+                    Toast.LENGTH_SHORT).show();                 //If cannot share, tell user
+        }
+    }
+
+    /**
+     * This method handles the calander
+     */
+    private void doCal(){
+        try {
+            Intent calIntent =
+                    new Intent(Intent.ACTION_INSERT);           //Prepare calander event
+            calIntent.setType("vnd.android.cursor.item/event"); //Set type
+            calIntent.putExtra(CalendarContract.Events.TITLE,   //Set title from event
+                    myEvent.getEventName())
+                    .putExtra(CalendarContract
+                                    .Events.DESCRIPTION,
+                            myEvent.getEventDescription())            //Set description from event
+                    .putExtra(CalendarContract
+                            .EXTRA_EVENT_ALL_DAY, myEvent.getIsAllDay())      //Set if all day from event
+                    .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,  //Set start time
+                            myEvent.getCalStart().getTimeInMillis()
+                                    + myEvent.startMS())                      //From event date and time
+                    .putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                            myEvent.getCalEnd().getTimeInMillis()
+                                    + myEvent.endMS());                       //End tie from event
+            startActivity(calIntent);                           //Start activity
+        } catch (Exception e) {
+            e.printStackTrace();                                //On error print stack
+            Toast.makeText(this, "Error creating " +
+                            "calendar  event. Is calendar" +
+                            " installed and working?",
+                    Toast.LENGTH_SHORT).show();                 //Tell user if failure
+        }
+    }
+
+    /**
+     * This is a helper method for doEmail()
+     * It tells it if gmail is installed
+     *
+     * @return if gmail is installed
+     */
+    private boolean isGMailInstalled() {
+        try {
+            getPackageManager()
+                    .getApplicationInfo(
+                            "com.google.android.gm", 0);        //See if gmail is installed
+            return true;                                        //Return yes
+        } catch (PackageManager.NameNotFoundException e) {      //If not...
+            return false;                                       //Return no!s
         }
     }
 }

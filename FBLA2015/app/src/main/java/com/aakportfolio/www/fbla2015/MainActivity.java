@@ -19,7 +19,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,7 +30,6 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -45,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
 //End of Imports
 //TODO Comment app!
 public class MainActivity extends ActionBarActivity {
@@ -61,8 +60,8 @@ public class MainActivity extends ActionBarActivity {
     //ListView on main page
     private ListView LV;
 
-    //This string allows us to update if app is resumed on different day.
-    private String lastUpdateDate;
+    //This string allows us to refil listview if app is resumed on different day.
+    private String lastRefillDate;
 
     /**
      * This is the starting method (like main)
@@ -71,13 +70,38 @@ public class MainActivity extends ActionBarActivity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //Android setup
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setTitle(R.string.title_activity_main);     //Set title
+
+        //Get the listview in the app, so we can later manipulate it
+        LV = (ListView) findViewById(R.id.listView);
+
+        //Set our onclick listener for the listview (item selected)
+        LV.setOnItemClickListener(new OnItemClickListener() {
+
+            public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                //Create an intent for the activity that displays events
+                Intent intent = new Intent(MainActivity.this, eventDummy.class);
+
+                //Tell the activity what event was selected
+                intent.putExtra("event", Events.get(position));
+
+                //Start the activity
+                startActivity(intent);
+            }
+        });
+
+        //Set title of app (slightly different than home screen)
+        setTitle(R.string.title_activity_main);
+
+        //Display our icon in the title bar
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowHomeEnabled(true);
         actionBar.setIcon(R.drawable.ic_launcher);
-        lastUpdateDate = "";
+
+        //Set lastUpdateDate to an empty string, so we can update the listview
+        lastRefillDate = "";
     }
 
     /**
@@ -87,186 +111,295 @@ public class MainActivity extends ActionBarActivity {
      */
     @Override
     protected void onResume() {
+        //Standard android setup
         super.onResume();
-        if (!new SimpleDateFormat("MM/dd/yyyy").format(new Date()).equals(lastUpdateDate)) {
-            lastUpdateDate = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
-            LV = (ListView) findViewById(R.id.listView); //Get our listview so we can edit it
-            fillListView(); //Read in our event file, and fill list view
 
-            //This code fragment allows us to detect selections
-            LV.setOnItemClickListener(new OnItemClickListener() {
+        //See if the listview was refilled today
+        if (!new SimpleDateFormat("MM/dd/yyyy").format(new Date()).equals(lastRefillDate)) {
 
-                public void onItemClick(AdapterView<?> arg0, View arg1, int position,
-                                        long arg3) {
-                    Intent intent = new Intent(MainActivity.this, eventDummy.class); //Get next activity
-                    intent.putExtra("event", Events.get(position)); //Pass selected event
-                    startActivity(intent);  //Start the activity
-                }
-            });
+            //If we haven't updated listview today, do so
+            //Set refill date to to today
+            lastRefillDate = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
+
+            //Fill the listview
+            fillListView();
         }
     }
 
     /**
-     * This method first removes events that shouldn't be shown, then sorts the events
+     * This method first removes events that shouldn't be shown,
+     * then sorts the events that remain
      */
     private void orderAndRemoveEvents() {
+        //Save variables for the current date
         int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(new Date())),
                 month = Integer.parseInt(new SimpleDateFormat("MM").format(new Date())),
                 day = Integer.parseInt(new SimpleDateFormat("dd").format(new Date()));
+
+        //Go through the arraylist of all events. If it shouldn't be shown, remove it
         for (int i = 0; i < Events.size(); i++) {
-            if (!Events.get(i).showEvent(month, day, year)) { //If event shouldn't be shown...
-                Events.remove(i); //remove it
-                i--; //Fix the position
+            if (!Events.get(i).showEvent(month, day, year)) {
+                Events.remove(i);
+                //Fix position in the arraylist to prevent off-by-one bug
+                i--;
             }
         }
-        Collections.sort(Events); //Sort the ArrayList with compareTo
+
+        //Use Timsort to sort our arraylist, using our compareTo method
+        Collections.sort(Events);
     }
 
     /**
-     * This method reads lines from cal file, and returns them
+     * This method reads lines from the event list, and returns the string
+     * containing all the lines
      *
-     * @return Lines from calander file
+     * @return Lines from calender file
      */
     private String readLines() {
-        boolean tryAgain = true;
-        String s = "";
-        while (tryAgain) {
+        //Try a maximum of three times to read lines from the file.
+        //If we fail, reset the file to default, and try again
+        for (int i = 0; i < 3; i++) {
             try {
-                FileInputStream fis = openFileInput(calName);
-                Scanner scan = new Scanner(fis);
+                //Create a string to hold the file lines
+                String fileLines = "";
+                //Open file from internal storage
+                Scanner scan = new Scanner(openFileInput(calName));
+
+                //Read lines until none are left, and append to string
                 while (scan.hasNextLine()) {
-                    s += scan.nextLine() + "\n";
+                    fileLines += scan.nextLine() + "\n";
                 }
-                tryAgain = false;
+
+                //If we made it to here, we succeeded.
+                //Therefore, we can close the file and return the lines
+                scan.close();
+                return fileLines;
             } catch (Exception e) {
+                //If we failed, use the default data
                 makeCSV();
             }
         }
-        return s;
+        //If we made it here, there is something wrong.
+        //We will just return an empty string
+        return "";
     }
 
     /**
-     *
+     * This function gets the lines from the file
+     * and puts them into an arraylist of events
      */
     private void readFileIntoArrayList() {
+        //Start by initializing the arraylist
         Events = new ArrayList<>(0);
-        int count = 0;
-        while (Events.size() == 0 && count < 3) {
-            String[] fileLines;
-            fileLines = readLines().split("\n");
-            for (int i = 0; i < fileLines.length; i++) {
-                Log.d("LINE=", "" + i);
-                String str = fileLines[i];
+
+        //Create a variable to keep track of how many times we go through and try
+        //to read events
+        int count;
+        //Try to read events while our list is empty
+        //and we haven't gone through 3 times
+        for (count = 0; Events.size() == 0 && count < 3; count++) {
+            //Go through each line in the file
+            for (String str : readLines().split("\n")) {
+                //If we have the right number of fields
                 if (str.split(",,").length == 7) {
+                    //Split the line and make a new event from it
                     Events.add(new MHSEvent(str.split(",,")));
                 }
             }
+
+
             orderAndRemoveEvents();
+
+            //If there are no events after sorting, or if the file was empty
             if (Events.size() == 0) {
+                //Tell the user we are resetting...
                 Toast.makeText(this, R.string.eventError, Toast.LENGTH_SHORT).show();
+
+                //Then reset
                 makeCSV();
             }
-            count++;
         }
-        if (count >= 3 && Events.size() == 0) {
+
+        //If we went through three times and still have no events,
+        //Something is wrong.
+        if (count == 3 && Events.size() == 0) {
+            //Tell the user we have no events
             Toast.makeText(this, R.string.noEvents, Toast.LENGTH_LONG).show();
+
+            //Reset the events list, to be safe
             Events = new ArrayList<>();
+
+            //Then add a fake event to remind the user about the problem.
             Events.add(new MHSEvent("Cannot load events",
-                    "Something bad happened and we cannot load events. Please check your date and time settings and try an update.",
+                    "Something bad happened and we cannot load events. Please check your " +
+                            "date and time settings and try an update.",
                     new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none",
                     new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none", "none"));
         }
-
     }
 
-
+    /**
+     * This method will refill the listview
+     * from the file on the internal storage
+     */
     public void fillListView() {
+        //Initialize the array
         readFileIntoArrayList();
-        List<Map<String, String>> data = new ArrayList<Map<String, String>>();
+
+        //Create an arraylist for our info that will go in the listview
+        List<Map<String, String>> data = new ArrayList<>();
+
+        //Go through the events, pull out the relevent info, and save it in the list
         for (MHSEvent item : Events) {
-            Map<String, String> datum = new HashMap<String, String>(2);
+            Map<String, String> datum = new HashMap<>(2);
             datum.put("title", item.toString());
+
+            //If there is one date, show that. If there are separate start
+            //and end dates, show both
             datum.put("date", item.getEventStartDate().equals(item.getEventEndDate())
-                    ? item.getEventStartDate() : item.getEventStartDate() + " - " + item.getEventEndDate());
+                    ? item.getEventStartDate()
+                    : item.getEventStartDate() + " - " + item.getEventEndDate());
+
+            //Add our map to the list
             data.add(datum);
         }
-        SimpleAdapter adapter = new SimpleAdapter(this, data,
-                android.R.layout.simple_list_item_2,
-                new String[]{"title", "date"},
-                new int[]{android.R.id.text1,
-                        android.R.id.text2});
+
+        //Create an adapter for the listview, using the list we created
+        SimpleAdapter adapter = new SimpleAdapter(this, data, android.R.layout.simple_list_item_2,
+                new String[]{"title", "date"}, new int[]{android.R.id.text1, android.R.id.text2});
+
+        //Set the listview's adapter to this one, and update the listview
         LV.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
 
-    //TODO Finish the CSV
+
+    /**
+     * This method will create a new csv.
+     * Called when none is found, or a corrupted one is detected
+     */
     private void makeCSV() {
+        //Create a scanner to read the integrated file
         Scanner s = new Scanner(new InputStreamReader(getResources().openRawResource(R.raw.cal)));
-        String cal = "";
+
+        //Create a string to store filelines
+        String fileLines = "";
+
+        //Read each line in the file and add it to the string
         while (s.hasNextLine()) {
-            cal += s.nextLine() + "\n";
+            fileLines += s.nextLine() + "\n";
         }
-        String fileName = calName;
-        FileOutputStream outputStream;
+
+        //Close input file
+        s.close();
+
+        //Try to write our file to storage
         try {
-            outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
-            outputStream.write(cal.getBytes());
+            //Create output stream to internal storage
+            FileOutputStream outputStream;
+            outputStream = openFileOutput(calName, Context.MODE_PRIVATE);
+
+            //Write bytes from string
+            outputStream.write(fileLines.getBytes());
+
+            //Flush and close output
+            outputStream.flush();
             outputStream.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * This method updates calender database stored on internal storage
+     */
     private void update() {
+        //Create and show a dialog to tell teh user we are updating
         final ProgressDialog progress = ProgressDialog.show(this, "Downloading updated events...",
                 "Please wait, downloading...", true);
-        final MainActivity a = this;
-
+        //Download the file in an async task.
         AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
-            private boolean fail = true;
+            //This boolean will keep track of whether we fail or not
+            private boolean fail;
 
+            /**
+             * Main background method. This is where the download happens
+             * @param params
+             * @return
+             */
             @Override
             protected Void doInBackground(Void... params) {
-                int count;
+                //Try to download
                 try {
-
-                    String fileName = "cal.csv";
+                    //Connect to website
                     URL website = new URL(downloadURL);
                     URLConnection connection = website.openConnection();
                     connection.connect();
                     InputStream input = new BufferedInputStream(website.openStream());
-                    FileOutputStream outputStream;
-                    outputStream = openFileOutput(fileName, Context.MODE_PRIVATE);
+
+                    //Create output stream to write file to internal storage
+                    FileOutputStream outputStream = openFileOutput(calName, Context.MODE_PRIVATE);
+
+                    //This array will hold the dowlnoaded data
                     byte data[] = new byte[1024];
+
+                    //Count how much data we downloaded
+                    int count;
                     while ((count = input.read(data)) != -1) {
-                        // writing data to file
+                        // write "count" amount of data to the file
                         outputStream.write(data, 0, count);
                     }
+
+                    //Flush and close the output and input
                     outputStream.flush();
                     outputStream.close();
                     input.close();
+
+                    //Note that we did not fail
                     fail = false;
                 } catch (Exception e) {
+                    //If we fail, output debug info
                     e.printStackTrace();
+
+                    //Also note that we failed
                     fail = true;
                 }
                 return null;
             }
 
+            /**
+             * This method is called when background task is done
+             * @param result
+             */
             @Override
             protected void onPostExecute(Void result) {
+                //See if we failed, and tell the user what happened
                 if (fail) {
-                    Toast.makeText(a, "Could not download event list.", Toast.LENGTH_SHORT).show();
+                    //Tell them we failed
+                    Toast.makeText(MainActivity.this, "Could not download event list.",
+                            Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(a, "Update completed.", Toast.LENGTH_SHORT).show();
+                    //Tell the user we succeeded
+                    Toast.makeText(MainActivity.this,
+                            "Update completed.", Toast.LENGTH_SHORT).show();
+                    //Refill the listview
+                    fillListView();
                 }
-                fillListView();
+                //Dismiss progress bar
                 progress.dismiss();
             }
         };
+
+        //Run the previously defined task
         task.execute((Void[]) null);
     }
 
+    /**
+     * Standard android code for options menu
+     *
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -276,65 +409,90 @@ public class MainActivity extends ActionBarActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * Show about box
+     */
     private void showAbout() {
+        //Create an alert dialog builder for a new alert dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.about_message)
+
+        //Set the title and message
+        builder.setIcon(R.drawable.ic_launcher)
+                .setMessage(R.string.about_message)
                 .setTitle(R.string.about_title);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User clicked OK button
-            }
-        });
+
+        //Add an OK button
+        builder.setPositiveButton(R.string.ok,
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        //Close dialog when user presses OK
+                        dialog.dismiss();
+                    }
+                });
+        //Create the actual dialog from the builder, then show it.
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
+    /**
+     * This method deals with action bar selections
+     *
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
+        //Get ID of selected item
         int id = item.getItemId();
         switch (id) {
             case R.id.action_update:
+                //For update button, try to update
                 update();
                 return true;
             case R.id.action_about:
+                //For about button, show about box
                 showAbout();
                 return true;
             case R.id.action_facebook:
-                try {
-                    openURL("http://www.facebook.com/MamaroneckPublicSchools");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                //For facebook button, open Mamkschools facebook
+                openURL("http://www.facebook.com/MamaroneckPublicSchools");
                 return true;
             case R.id.action_twitter:
-                try {
-                    openURL("twitter://twitter.com/MamaroneckED");
-                } catch (Exception e) {
-                    try {
-                        openURL("http://www.twitter.com/MamaroneckED");
-                    } catch (Exception e1) {
-                        e.printStackTrace();
-                        e1.printStackTrace();
-                    }
+                //For twitter button, try to open twitter app to Mamkschools
+                if (!openURL("twitter://twitter.com/MamaroneckED")) {
+                    //If twitter isn't installed, try again with browser
+                    openURL("http://www.twitter.com/MamaroneckED");
                 }
                 return true;
             case R.id.action_website:
-                try {
-                    openURL("http://mhs.mamkschools.org/");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                //Open browser to Mamkschools page
+                openURL("http://mhs.mamkschools.org/");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    public void openURL(String url) throws Exception {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(browserIntent);
+    /**
+     * Open a URL
+     *
+     * @param url URL to open
+     * @throws Exception
+     */
+    public boolean openURL(String url) {
+        try {
+            //Try to open page with browser or other app
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(browserIntent);
+            return true;
+        } catch (Exception e) {
+            //If error, print stack and return false
+            e.printStackTrace();
+            return false;
+        }
     }
 }
