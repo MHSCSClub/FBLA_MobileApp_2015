@@ -6,8 +6,8 @@ android {
 
     defaultConfig {
         applicationId "com.aakportfolio.www.fbla2015"
-        minSdkVersion 14
-        targetSdkVersion 21
+        minSdkVersion 14    //Icecream Sandwich
+        targetSdkVersion 21 //Lollipop
         versionCode 1
         versionName "1.0"
     }

@@ -1,28 +1,31 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!-- This file contains various strings for the app -->
 <resources>
-
     <string name="app_name">MHS Events</string>
+
     <string name="action_update">Update List</string>
     <string name="title_activity_main"> MHS Event List</string>
     <string name="action_twitter">Go to Twitter page</string>
     <string name="action_facebook">Go to Facebook page</string>
     <string name="action_website">Go to MHS website</string>
     <string name="action_about">About</string>
+
     <string name="about_title">About MHS Event List</string>
-    <string name="about_message">MHS Event List.\nCopyright © Andrew Katz, 2015.\nAll Rights
-        Reserved.\n\nThis app contains a calender of all upcoming events of interest to the
-        Mamaroneck High School Community. The app contains a description of the event, when it
-        occurs, and other relevant information.</string>
+        <string name="about_message">MHS Event List.\nCopyright © Andrew Katz, 2015.\nAll Rights
+            Reserved.\n\nThis app contains a calender of all upcoming events of interest to the
+            Mamaroneck High School Community. The app contains a description of the event, when it
+            occurs, and other relevant information.</string>
     <string name="ok">OK</string>
+
     <string-array name="list">
         <item>Cannot populate list.</item>
     </string-array>
-    <string name="title_activity_event_dummy">eventDummy</string>
+    <string name="noEvents">Something bad happened and we cannot load events.</string>
     <string name="update_success">Update Completed</string>
     <string name="update_failed">Unable to download event list. Please check your connection.</string>
     <string name="eventError">Downloaded file was invalid. Defaults restored.</string>
+
+    <string name="title_activity_event_dummy">Event Viewer</string>
     <string name="emailBtn">Email Organizer</string>
     <string name="shareBtn">Share Event</string>
     <string name="calBtn">Add to Calendar</string>
-    <string name="noEvents">Something bad happened and we cannot load events.</string>
 </resources>

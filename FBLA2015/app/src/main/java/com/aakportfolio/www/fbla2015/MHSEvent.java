@@ -19,25 +19,22 @@ import java.util.regex.Pattern;
 //End of imports
 
 public class MHSEvent implements Serializable, Comparable {
-    boolean isAllDay = true;
+
     //Instance variables. They have some defaults here for purposes of examples
 
+    boolean isAllDay = true;
     //Event name
     private String eventName = "Untitled Event";
-
     //Event Description
     private String eventDescription = "No Description";
-
     //Email Address
     private String contactEmail = "events-temp@mamkschools.org";
-
     //Date variables
     private int MM = 00;
     private int DD = 00;
     private int YYYY = 0000;
     private String eventStartDate = "00/00/0000";
     private String eventEndDate = "00/00/0000";
-
     //Millisecond variables
     private long startMillisec = 0;
     private long endMillisec = 0;
@@ -53,61 +50,71 @@ public class MHSEvent implements Serializable, Comparable {
      * @param endTime     End time (HH:MM AMPM)
      * @param email       email address
      */
-    public MHSEvent(String name, String Description, String startDate,
-                    String startTime, String endDate, String endTime, String email) {
-        eventName = name;                                                       //Set Event Name
-        startMillisec = 0;                                                      //Zero millisec
-        endMillisec = 0;                                                        //Zero millisec
-        isAllDay = true;                                                        //Set to isAllDay
-        eventDescription = eventName + "\n";                                    //Start desc. with
-        //name
-        if (!startTime.trim().equals("none")) {                                 //If we have start
-            if (startTime.trim().equals("allday")) {                            //if allday...
-                eventDescription += "All day event" + "\n";                     //Note in desc.
+    public MHSEvent(String name, String Description, String startDate, String startTime,
+                    String endDate, String endTime, String email) {
+        //Initialize variables
+        eventName = name;
+        startMillisec = 0;
+        endMillisec = 0;
+        isAllDay = true;
+        eventDescription = eventName + "\n";
+        if (!startTime.trim().equals("none")) {
+            if (startTime.trim().equals("allday")) {
+                //If there is an all day event for start time, note it
+                eventDescription += "All day event" + "\n";
             } else {
-
-
+                //If we have specific times...
                 try {
-                    eventDescription += "Start time: " + startTime + "\n";
-                    isAllDay = false;
-                    long hours = Long.parseLong(startTime.split(":")[0]);
-                    long minutes = Long.parseLong(startTime.split(":")[1].split(" ")[0]);
-                    String ampm = startTime.substring(startTime.indexOf(" ") + 1);
-                    if (ampm.equals("PM")) hours += 12L;
-                    minutes += hours * 60L;
-                    long seconds = minutes * 60L;
-                    startMillisec = seconds * 1000L;
-                } catch (Exception e) {
-                    //Just use the defaults, and treat it as no start time if invalid
-                    }
-
-
-                if (!endTime.trim().equals("none")) {
-                    try {
-                        long hours = Long.parseLong(endTime.split(":")[0]);
-                        long minutes = Long.parseLong(endTime.split(":")[1].split(" ")[0]);
-                        String ampm = startTime.substring(endTime.indexOf(" ") + 1);
+                    {
+                        //Try to calculate milliseconds
+                        long hours = Long.parseLong(startTime.split(":")[0]);
+                        long minutes = Long.parseLong(startTime.split(":")[1].split(" ")[0]);
+                        String ampm = startTime.substring(startTime.indexOf(" ") + 1);
                         if (ampm.equals("PM")) hours += 12L;
                         minutes += hours * 60L;
                         long seconds = minutes * 60L;
-                        endMillisec = seconds * 1000L;
-                        eventDescription += "End Time: " + endTime + "\n";
-                    } catch (Exception e) {
-                        //Leave it blank, treat it as if there is no end time
+                        //If we reach this point, we have a valid time, so write the variables
+                        startMillisec = seconds * 1000L;
+                        isAllDay = false;
+                        eventDescription += "Start time: " + startTime + "\n";
                     }
+                    if (!endTime.trim().equals("none")) {
+                        try {
+                            //Try to calculate milliseconds
+                            long hours = Long.parseLong(endTime.split(":")[0]);
+                            long minutes = Long.parseLong(endTime.split(":")[1].split(" ")[0]);
+                            String ampm = startTime.substring(endTime.indexOf(" ") + 1);
+                            if (ampm.equals("PM")) hours += 12L;
+                            minutes += hours * 60L;
+                            long seconds = minutes * 60L;
+                            //If we reach this point, we have a valid time, so write variables
+                            endMillisec = seconds * 1000L;
+                            eventDescription += "End Time: " + endTime + "\n";
+                        } catch (Exception e) {
+                            //Leave it blank, treat it as if there is no end time
+                        }
+                    }
+                } catch (Exception e) {
+                    //Just use the defaults, and treat it as no start time if invalid
                 }
             }
         }
+        //Set description, if we have one
         if (Description.trim().equals("none")) {
             eventDescription += "No Description";
         } else {
             eventDescription += Description;
         }
+
+        //Try to set dates
         try {
             MM = Integer.parseInt(startDate.split(Pattern.quote("/"))[0]);
             DD = Integer.parseInt(startDate.split(Pattern.quote("/"))[1]);
             YYYY = Integer.parseInt(startDate.split(Pattern.quote("/"))[2]);
+            eventEndDate = endDate;
+            eventStartDate = startDate;
         } catch (Exception e) {
+            //If invalid date, basically nullify the event
             MM = 00;
             DD = 00;
             YYYY = 00;
@@ -115,8 +122,7 @@ public class MHSEvent implements Serializable, Comparable {
             eventEndDate = "00/00/0000";
             e.printStackTrace();
         }
-        eventEndDate = endDate;
-        eventStartDate = startDate;
+        //Set the last variable
         contactEmail = email.trim();
     }
 
@@ -129,21 +135,6 @@ public class MHSEvent implements Serializable, Comparable {
         this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5], inArr[6]);
     }
 
-    public String getEventName() {
-        return eventName;
-    }
-
-    public String getEventDescription() {
-        return eventDescription;
-    }
-
-    public String getContactEmail() {
-        return contactEmail;
-    }
-
-    public boolean showEmail() {
-        return !contactEmail.equals("none");
-    }
 
     /**
      * Compares date and sees if should be displayed.
@@ -166,45 +157,29 @@ public class MHSEvent implements Serializable, Comparable {
         }
     }
 
-    public String toString() {
-        return getEventName();
-    }
-
-    public String getEventDates() {
-        return eventStartDate.equals(eventEndDate)
-                ? "Date: " + eventStartDate
-                : "Starts: " + eventStartDate + "\n" + "Ends: " + eventEndDate;
-    }
-
-    public String getEventStartDate() {
-        return eventStartDate;
-    }
-
-    public String getEventEndDate() {
-        return eventEndDate;
-    }
-
-    public int[] getDateFields() {
-        return new int[]{MM, DD, YYYY};
-    }
-
+    /**
+     * Compares MHSEvetns by start date. For sorting.
+     *
+     * @param another
+     * @return
+     */
     @Override
     public int compareTo(@NonNull Object another) {
         if (!(another instanceof MHSEvent)) return -1;
-        int[] aa = ((MHSEvent) another).getDateFields();
-        if (YYYY < aa[2]) {
+        int[] anotherEventDateArray = ((MHSEvent) another).getDateFields();
+        if (YYYY < anotherEventDateArray[2]) {
             return -1;
-        } else if (YYYY > aa[2]) {
+        } else if (YYYY > anotherEventDateArray[2]) {
             return 1;
         } else {
-            if (MM < aa[0]) {
+            if (MM < anotherEventDateArray[0]) {
                 return -1;
-            } else if (MM > aa[0]) {
+            } else if (MM > anotherEventDateArray[0]) {
                 return 1;
             } else {
-                if (DD < aa[1]) {
+                if (DD < anotherEventDateArray[1]) {
                     return -1;
-                } else if (DD > aa[1]) {
+                } else if (DD > anotherEventDateArray[1]) {
                     return 1;
                 } else {
                     return 0;
@@ -213,6 +188,16 @@ public class MHSEvent implements Serializable, Comparable {
         }
     }
 
+    /**
+     * Tostring
+     *
+     * @return event name
+     */
+    public String toString() {
+        return getEventName();
+    }
+
+    //Begin getter methods
     public GregorianCalendar getCalStart() {
         return new GregorianCalendar(YYYY, MM, DD);
     }
@@ -240,5 +225,46 @@ public class MHSEvent implements Serializable, Comparable {
 
     public boolean getIsAllDay() {
         return isAllDay;
+    }
+
+    public String getEventName() {
+        return eventName;
+    }
+
+    public String getEventDescription() {
+        return eventDescription;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public String getEventDates() {
+        return eventStartDate.equals(eventEndDate)
+                ? "Date: " + eventStartDate
+                : "Starts: " + eventStartDate + "\n" + "Ends: " + eventEndDate;
+    }
+
+    public String getEventStartDate() {
+        return eventStartDate;
+    }
+
+    public String getEventEndDate() {
+        return eventEndDate;
+    }
+
+    public int[] getDateFields() {
+        return new int[]{MM, DD, YYYY};
+    }
+
+    //End of getter methods
+
+    /**
+     * Says if email should be shown
+     *
+     * @return if event should be shown
+     */
+    public boolean showEmail() {
+        return !contactEmail.equals("none");
     }
 }
