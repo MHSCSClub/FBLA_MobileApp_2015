@@ -19,9 +19,9 @@ This application was developed using Android Studio. In order to view the source
 
 1.  Begin by first installing Java JDK 8, followed by Android Studio. Download links are above, however versions are provided in the "Setup" folder. Note that these versions may be obsolete at the time of installation.
 2.  Next, extract "MHSEvents-Project.zip" (right-click on it and choose "Extract All") to a known location on the computer.
-3.  Launch Android Studio, and allow it to install the Android SDK and the default emulator. When presented with the screen shown in [figure 1](fig1.jpg), choose Open an Existing Android Studio Project.
+3.  Launch Android Studio, and allow it to install the Android SDK and the default emulator. When presented with the screen shown in [figure 1](http://aakatz3.github.io/2015MamkFBLAApp/fig1.JPG), choose Open an Existing Android Studio Project.
 4.  Browse to the folder that you extracted the zip to, and select FBLA2015. It will have a different icon than the other folders.5.  Once the project is open, wait for the Gradle sync to complete. Android Studio will then load for approximately 5 minutes.
-6.  Next, click on the "play" button when it becomes green [(figure 2)](fig2.jpg), and either launch the emulator by directly pressing OK, or attach a physical phone with USB debugging enabled, select it in the list, and press OK.
+6.  Next, click on the "play" button when it becomes green [(figure 2)](http://aakatz3.github.io/2015MamkFBLAApp/fig2.JPG), and either launch the emulator by directly pressing OK, or attach a physical phone with USB debugging enabled, select it in the list, and press OK.
 	When Android boots up, unlock the phone, and wait a few seconds. The app (MHS Events) should now launch, after a brief pause.
 
 * * *
