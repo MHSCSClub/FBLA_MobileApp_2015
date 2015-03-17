@@ -10,10 +10,9 @@ package com.aakportfolio.www.fbla2015;
 //Import section
 
 import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.support.v7.app.ActionBarActivity;
@@ -123,32 +122,28 @@ public class eventDummy extends ActionBarActivity implements View.OnClickListene
      * This method will send the email
      */
     private void sendEmail() {
-        if (!isGMailInstalled()) {
-            //If gmail isn't installed, tell user we cannot email
-            Toast.makeText(eventDummy.this, "No email clients installed\nYou may manually " +
-                    "email this address: " + myEvent.getContactEmail(), Toast.LENGTH_LONG)
-                    .show();
-        } else {
-            //If gmail is installed, we can send email
+        //Create intent to send email
+        final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
 
-            //Create intent to send email
-            Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+        //Set the data of the email from the event
+        emailIntent.setType("plain/text");
+        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,
+                new String[]{myEvent.getContactEmail()});
+        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                "Questions about an event: " + myEvent);
+        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT,
+                "Please explain your questions here.");
 
-            //Set data
-            emailIntent.setData(Uri.parse("mailto:" + myEvent.getContactEmail()));
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Questions about an event: " + myEvent);
-            emailIntent.putExtra(Intent.EXTRA_TEXT, "Please explain your questions here.");
-            try {
-                //Create a chooser in case multiple email apps are installed
-                startActivity(Intent.createChooser(emailIntent, "Please select email application"));
-            } catch (android.content.ActivityNotFoundException ex) {
-                //If no email apps are installed, (and we shouldn't actually
-                // reach this, but just in case) tell the user
-                Toast.makeText(eventDummy.this, "No email clients stalled.\nYou may manually email "
-                        + "this address: " + myEvent.getContactEmail(), Toast.LENGTH_LONG)
-                        .show();
-            }
+
+        try {
+            //Create a chooser in case multiple email apps are installed
+            startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+        } catch (ActivityNotFoundException ex) {
+            //If no email apps are installed, and the chooser crashes, tell user ourselves
+            Toast.makeText(eventDummy.this, "No email clients stalled.\nYou may manually email "
+                    + "this address: " + myEvent.getContactEmail(), Toast.LENGTH_LONG).show();
         }
+
     }
 
     /**
@@ -194,23 +189,6 @@ public class eventDummy extends ActionBarActivity implements View.OnClickListene
             e.printStackTrace();
             Toast.makeText(this, "Error creating calendar  event. Is calendar installed and " +
                     "working?", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * This is a helper method for doEmail()
-     * It tells it if gmail is installed
-     *
-     * @return if gmail is installed
-     */
-    private boolean isGMailInstalled() {
-        try {
-            //Try to get the gmail app. if works say true
-            getPackageManager().getApplicationInfo("com.google.android.gm", 0);
-            return true;
-        } catch (PackageManager.NameNotFoundException e) {
-            //If it doesn't work, say false
-            return false;
         }
     }
 }

@@ -11,8 +11,6 @@ package com.aakportfolio.www.fbla2015;
 
 //Import section
 
-import android.support.annotation.NonNull;
-
 import java.io.Serializable;
 import java.util.GregorianCalendar;
 import java.util.regex.Pattern;
@@ -75,6 +73,7 @@ public class MHSEvent implements Serializable, Comparable {
                         long seconds = minutes * 60L;
                         //If we reach this point, we have a valid time, so write the variables
                         startMillisec = seconds * 1000L;
+                        endMillisec = startMillisec;
                         isAllDay = false;
                         eventDescription += "Start time: " + startTime + "\n";
                     }
@@ -164,7 +163,7 @@ public class MHSEvent implements Serializable, Comparable {
      * @return
      */
     @Override
-    public int compareTo(@NonNull Object another) {
+    public int compareTo(Object another) {
         if (!(another instanceof MHSEvent)) return -1;
         int[] anotherEventDateArray = ((MHSEvent) another).getDateFields();
         if (YYYY < anotherEventDateArray[2]) {
