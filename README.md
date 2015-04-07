@@ -28,4 +28,3 @@ This application was developed using Android Studio. In order to view the source
 
 Screenshots for this app are in the file "Screenshots.pdf"
 
-If you have any trouble installing this app, or have any questions, please contact the developer at: [aakatz4@live.com](mailto:aakatz4@live.com), or by calling: [1(914)602-3636](tel:+19146023636)
