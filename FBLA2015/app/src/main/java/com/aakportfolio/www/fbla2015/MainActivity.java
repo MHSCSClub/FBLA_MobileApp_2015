@@ -76,7 +76,6 @@ public class MainActivity extends ActionBarActivity {
 
         //Get the listview in the app, so we can later manipulate it
         LV = (ListView) findViewById(R.id.listView);
-
         //Set our onclick listener for the listview (item selected)
         LV.setOnItemClickListener(new OnItemClickListener() {
 
