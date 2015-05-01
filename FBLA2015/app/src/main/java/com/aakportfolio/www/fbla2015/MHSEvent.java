@@ -49,7 +49,7 @@ public class MHSEvent implements Serializable, Comparable {
      * @param email       email address
      */
     public MHSEvent(String name, String Description, String startDate, String startTime,
-                    String endDate, String endTime, String email) {
+                    String endDate, String endTime, String email, String type) {
         //Initialize variables
         eventName = name;
         startMillisec = 0;
@@ -131,7 +131,7 @@ public class MHSEvent implements Serializable, Comparable {
      * @param inArr Array of All the same paramaters of main constructor
      */
     public MHSEvent(String[] inArr) {
-        this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5], inArr[6]);
+        this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5], inArr[6],""/*Change to arr 7 */);
     }
 
 

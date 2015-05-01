@@ -11,9 +11,13 @@ package com.aakportfolio.www.fbla2015;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -48,8 +52,9 @@ import java.util.Scanner;
 
 public class MainActivity extends ActionBarActivity {
 
-    //File download URL. Can be changed to the school if needed
-    private static final String downloadURL = "http://aakatz3.github.io/2015MamkFBLAApp/cal.csv";
+
+    //Preference name
+    private static final String lastUpdatePrefName = "lastUpdatePref";
 
     //Calandar Filename
     private static final String calName = "cal.csv";
@@ -60,11 +65,12 @@ public class MainActivity extends ActionBarActivity {
     //ListView on main page
     private ListView LV;
 
-    //This string allows us to refil listview if app is resumed on different day.
-    private String lastRefillDate;
+    //This string allows us to update data
+    private String lastUpdate;
 
     /**
      * This is the starting method (like main)
+     * It runs when the application is loaded into memory
      *
      * @param savedInstanceState Pass to super
      */
@@ -73,6 +79,9 @@ public class MainActivity extends ActionBarActivity {
         //Android setup
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences prefs = getSharedPreferences("MHSEvents", MODE_PRIVATE);
+        lastUpdate = prefs.getString(lastUpdatePrefName, "");
 
         //Get the listview in the app, so we can later manipulate it
         LV = (ListView) findViewById(R.id.listView);
@@ -96,15 +105,17 @@ public class MainActivity extends ActionBarActivity {
 
         //Display our icon in the title bar
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayShowHomeEnabled(true);
-        actionBar.setIcon(R.drawable.ic_launcher);
+        if(actionBar != null) {
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setIcon(R.drawable.ic_launcher);
+        }
 
-        //Set lastUpdateDate to an empty string, so we can update the listview
-        lastRefillDate = "";
+
     }
 
     /**
-     * This method is called after onCreate
+     * This method is called after onCreate, when an app is in memory and reopened,
+     * and the orientation is changed.
      * We will fill/refill the listview here so if user
      * resumes app the next day, old events will be purged.
      */
@@ -113,18 +124,41 @@ public class MainActivity extends ActionBarActivity {
         //Standard android setup
         super.onResume();
 
+        //Fill the listview
+        fillListView();
         //See if the listview was refilled today
-        if (!new SimpleDateFormat("MM/dd/yyyy").format(new Date()).equals(lastRefillDate)) {
-
-            //If we haven't updated listview today, do so
-            //Set refill date to to today
-            lastRefillDate = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
-
-            //Fill the listview
-            fillListView();
+        if (!new SimpleDateFormat("MM/dd/yyyy").format(new Date()).equals(lastUpdate)) {
+            //If we didn't update today
+            //Set update to today
+            lastUpdate = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
+            //Lets check if there is internet
+            if(isNetworkAvailable()) { //Check if there is internet
+                //If we have internet, preform an update.
+                update();
+            }
         }
     }
+    @Override
+    public void onPause(){
+        //Call super
+        super.onPause();
 
+        //Save update date
+        SharedPreferences.Editor editor = getSharedPreferences("MHSEvents", MODE_PRIVATE).edit();
+        editor.putString(lastUpdatePrefName, lastUpdate);
+        editor.commit();
+    }
+
+    @Override
+    protected void onDestroy(){
+        //Save update date
+        SharedPreferences.Editor editor = getSharedPreferences("MHSEvents", MODE_PRIVATE).edit();
+        editor.putString(lastUpdatePrefName, lastUpdate);
+        editor.commit();
+
+        //Call super
+        super.onDestroy();
+    }
     /**
      * This method first removes events that shouldn't be shown,
      * then sorts the events that remain
@@ -233,7 +267,7 @@ public class MainActivity extends ActionBarActivity {
                     "Something bad happened and we cannot load events. Please check your " +
                             "date and time settings and try an update.",
                     new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none",
-                    new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none", "none"));
+                    new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none", "none",""));
         }
     }
 
@@ -314,80 +348,8 @@ public class MainActivity extends ActionBarActivity {
      */
     private void update() {
         //Create and show a dialog to tell teh user we are updating
-        final ProgressDialog progress = ProgressDialog.show(this, "Downloading updated events...",
-                "Please wait, downloading...", true);
         //Download the file in an async task.
-        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
-            //This boolean will keep track of whether we fail or not
-            private boolean fail;
-
-            /**
-             * Main background method. This is where the download happens
-             * @param params   Required
-             * @return null
-             */
-            @Override
-            protected Void doInBackground(Void... params) {
-                //Try to download
-                try {
-                    //Connect to website
-                    URL website = new URL(downloadURL);
-                    URLConnection connection = website.openConnection();
-                    connection.connect();
-                    InputStream input = new BufferedInputStream(website.openStream());
-
-                    //Create output stream to write file to internal storage
-                    FileOutputStream outputStream = openFileOutput(calName, Context.MODE_PRIVATE);
-
-                    //This array will hold the dowlnoaded data
-                    byte data[] = new byte[1024];
-
-                    //Count how much data we downloaded
-                    int count;
-                    while ((count = input.read(data)) != -1) {
-                        // write "count" amount of data to the file
-                        outputStream.write(data, 0, count);
-                    }
-
-                    //Flush and close the output and input
-                    outputStream.flush();
-                    outputStream.close();
-                    input.close();
-
-                    //Note that we did not fail
-                    fail = false;
-                } catch (Exception e) {
-                    //If we fail, output debug info
-                    e.printStackTrace();
-
-                    //Also note that we failed
-                    fail = true;
-                }
-                return null;
-            }
-
-            /**
-             * This method is called when background task is done
-             * @param result  we do not care
-             */
-            @Override
-            protected void onPostExecute(Void result) {
-                //See if we failed, and tell the user what happened
-                if (fail) {
-                    //Tell them we failed
-                    Toast.makeText(MainActivity.this, "Could not download event list.",
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    //Tell the user we succeeded
-                    Toast.makeText(MainActivity.this,
-                            "Update completed.", Toast.LENGTH_SHORT).show();
-                    //Refill the listview
-                    fillListView();
-                }
-                //Dismiss progress bar
-                progress.dismiss();
-            }
-        };
+        AsyncTask<Void,Void,Void> task = new Downloader(this);
 
         //Run the previously defined task
         task.execute((Void[]) null);
@@ -492,5 +454,11 @@ public class MainActivity extends ActionBarActivity {
             e.printStackTrace();
             return false;
         }
+    }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

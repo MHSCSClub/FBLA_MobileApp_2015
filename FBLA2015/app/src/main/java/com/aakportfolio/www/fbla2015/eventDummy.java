@@ -137,7 +137,7 @@ public class eventDummy extends ActionBarActivity implements View.OnClickListene
 
         try {
             //Create a chooser in case multiple email apps are installed
-            startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+            startActivity(emailIntent);
         } catch (ActivityNotFoundException ex) {
             //If no email apps are installed, and the chooser crashes, tell user ourselves
             Toast.makeText(eventDummy.this, "No email clients stalled.\nYou may manually email "

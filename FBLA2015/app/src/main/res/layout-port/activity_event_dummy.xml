@@ -38,6 +38,18 @@
                     android:text="No Description"
                     android:id="@+id/descriptionView" />
 
+                <ImageView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/eventImage"
+                    android:layout_gravity="center_horizontal"
+                    android:src="@drawable/ic_launcher"
+                    android:minHeight="128dp"
+                    android:minWidth="128dp"
+                    android:adjustViewBounds="true"
+                    android:maxHeight="256dp"
+                    android:maxWidth="256dp" />
+
             </LinearLayout>
         </ScrollView><![CDATA[
         >
