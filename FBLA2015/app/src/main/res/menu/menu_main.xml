@@ -1,32 +1,42 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:mhsEvents="http://schemas.android.com/apk/res-auto">
 
-    <!-- Update, should appear as action button -->
+
+
+
+    <!-- Facebook Page, Always show-->
+    <item
+        android:id="@+id/action_facebook"
+        android:icon="@drawable/ic_facebook"
+        android:title="@string/action_facebook"
+        mhsEvents:showAsAction="always" />
+
+    <!-- Twitter Page, Always show -->
+    <item
+        android:id="@+id/action_twitter"
+        android:icon="@drawable/ic_twitter"
+        android:title="@string/action_twitter"
+        mhsEvents:showAsAction="always" />
+
+    <!-- Website, Appear if room -->
+    <item
+        android:id="@+id/action_website"
+        android:icon="@drawable/ic_website"
+        android:title="@string/action_website"
+        mhsEvents:showAsAction="ifRoom" />
+
+    <!-- Update, Appear if room -->
     <item
         android:id="@+id/action_update"
         android:icon="@drawable/ic_update"
         android:title="@string/action_update"
         mhsEvents:showAsAction="ifRoom" />
 
-    <!-- Website, Always hidden -->
-    <item
-        android:id="@+id/action_website"
-        android:title="@string/action_website"
-        mhsEvents:showAsAction="never" />
-    <!-- Facebook Page, Always hidden -->
-    <item
-        android:id="@+id/action_facebook"
-        android:title="@string/action_facebook"
-        mhsEvents:showAsAction="never" />
-    <!-- Twitter Page, Always hidden -->
-    <item
-        android:id="@+id/action_twitter"
-        android:title="@string/action_twitter"
-        mhsEvents:showAsAction="never" />
-    <!-- About, Always hidden -->
+    <!-- About, Appear if room-->
     <item
         android:id="@+id/action_about"
+        android:icon="@drawable/ic_about"
         android:title="@string/action_about"
-        mhsEvents:showAsAction="never" />
+        mhsEvents:showAsAction="ifRoom" />
 
 </menu>

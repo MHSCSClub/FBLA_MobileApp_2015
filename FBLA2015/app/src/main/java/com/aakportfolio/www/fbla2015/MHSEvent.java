@@ -20,6 +20,7 @@ public class MHSEvent implements Serializable, Comparable {
 
     //Instance variables. They have some defaults here for purposes of examples
 
+    //If event is all day
     boolean isAllDay = true;
     //Event name
     private String eventName = "Untitled Event";
@@ -36,6 +37,9 @@ public class MHSEvent implements Serializable, Comparable {
     //Millisecond variables
     private long startMillisec = 0;
     private long endMillisec = 0;
+    //Type of event (for graphic)
+    private String eventType = "none";
+
 
     /**
      * Constructor for event.
@@ -99,9 +103,7 @@ public class MHSEvent implements Serializable, Comparable {
             }
         }
         //Set description, if we have one
-        if (Description.trim().equals("none")) {
-            eventDescription += "No Description";
-        } else {
+        if (!Description.trim().equals("none")) {
             eventDescription += Description;
         }
 
@@ -121,8 +123,9 @@ public class MHSEvent implements Serializable, Comparable {
             eventEndDate = "00/00/0000";
             e.printStackTrace();
         }
-        //Set the last variable
+        //Set the last variables
         contactEmail = email.trim();
+        eventType = type.trim();
     }
 
     /**
@@ -131,7 +134,7 @@ public class MHSEvent implements Serializable, Comparable {
      * @param inArr Array of All the same paramaters of main constructor
      */
     public MHSEvent(String[] inArr) {
-        this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5], inArr[6],""/*Change to arr 7 */);
+        this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5], inArr[6],inArr[7]);
     }
 
 
@@ -212,6 +215,10 @@ public class MHSEvent implements Serializable, Comparable {
             return new GregorianCalendar(YYYY, MM, DD);
         }
 
+    }
+
+    public String getEventType(){
+        return eventType;
     }
 
     public long startMS() {

@@ -41,14 +41,14 @@
                 <ImageView
                     android:layout_width="fill_parent"
                     android:layout_height="fill_parent"
-                    android:id="@+id/imageView"
+                    android:id="@+id/eventImg"
                     android:layout_gravity="center_horizontal"
                     android:src="@drawable/ic_launcher"
+                    android:maxHeight="96dp"
+                    android:maxWidth="96dp"
+                    android:adjustViewBounds="true"
                     android:minHeight="64dp"
-                    android:minWidth="64dp"
-                    android:maxHeight="128dp"
-                    android:maxWidth="128dp"
-                    android:adjustViewBounds="true" />
+                    android:minWidth="64dp" />
 
             </LinearLayout>
         </ScrollView><![CDATA[

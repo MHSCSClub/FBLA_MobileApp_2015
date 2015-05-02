@@ -3,7 +3,6 @@
     <string name="app_name">MHS Events</string>
 
     <string name="action_update">Update List</string>
-    <string name="title_activity_main"> MHS Event List</string>
     <string name="action_twitter">Go to Twitter page</string>
     <string name="action_facebook">Go to Facebook page</string>
     <string name="action_website">Go to MHS website</string>
@@ -11,7 +10,7 @@
 
     <string name="about_title">About MHS Event List</string>
         <string name="about_message">MHS Event List.\nCopyright © Andrew Katz, 2015.\nAll Rights
-            Reserved.\n\nThis app contains a calendar of all upcoming events of interest to the
+            Reserved.\n\nThis app contains a calendar of all events of interest to the
             Mamaroneck High School Community. The app contains a description of the event, when it
             occurs, and other relevant information.</string>
     <string name="ok">OK</string>

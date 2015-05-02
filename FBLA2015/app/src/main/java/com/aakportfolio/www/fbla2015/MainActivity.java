@@ -2,6 +2,7 @@
 /**
  * This is the starting activity for this android app.
  * Upon launching the app, this file is used.
+ *
  * @author Andrew Katz
  * @version 1.0
  */
@@ -9,6 +10,7 @@ package com.aakportfolio.www.fbla2015;
 
 //Import Section
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
@@ -23,6 +25,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -33,14 +37,22 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,15 +62,7 @@ import java.util.Scanner;
 
 //End of Imports
 
-public class MainActivity extends ActionBarActivity {
-
-
-    //Preference name
-    private static final String lastUpdatePrefName = "lastUpdatePref";
-
-    //Calandar Filename
-    private static final String calName = "cal.csv";
-
+public class MainActivity extends AppCompatActivity {
     //This arraylist contians events from file
     private ArrayList<MHSEvent> Events;
 
@@ -81,7 +85,7 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         SharedPreferences prefs = getSharedPreferences("MHSEvents", MODE_PRIVATE);
-        lastUpdate = prefs.getString(lastUpdatePrefName, "");
+        lastUpdate = prefs.getString(MHSConstants.lastUpdatePrefName, "");
 
         //Get the listview in the app, so we can later manipulate it
         LV = (ListView) findViewById(R.id.listView);
@@ -100,17 +104,14 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        //Set title of app (slightly different than home screen)
-        setTitle(R.string.title_activity_main);
-
         //Display our icon in the title bar
         ActionBar actionBar = getSupportActionBar();
-        if(actionBar != null) {
+        if (actionBar != null) {
             actionBar.setDisplayShowHomeEnabled(true);
             actionBar.setIcon(R.drawable.ic_launcher);
         }
-
-
+        //Fill listview for initial time
+        fillListView();
     }
 
     /**
@@ -124,50 +125,55 @@ public class MainActivity extends ActionBarActivity {
         //Standard android setup
         super.onResume();
 
-        //Fill the listview
-        fillListView();
-        //See if the listview was refilled today
+
+        //See if the listview was refilled today, and update preformed
         if (!new SimpleDateFormat("MM/dd/yyyy").format(new Date()).equals(lastUpdate)) {
-            //If we didn't update today
+            //If we didn't update today and refill today
             //Set update to today
             lastUpdate = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
             //Lets check if there is internet
-            if(isNetworkAvailable()) { //Check if there is internet
+            if (isNetworkAvailable()) { //Check if there is internet
                 //If we have internet, preform an update.
                 update();
             }
+            //Refill to remove old events and add new ones
+            //Fill the listview
+            fillListView();
         }
     }
+
     @Override
-    public void onPause(){
+    public void onPause() {
         //Call super
         super.onPause();
 
         //Save update date
         SharedPreferences.Editor editor = getSharedPreferences("MHSEvents", MODE_PRIVATE).edit();
-        editor.putString(lastUpdatePrefName, lastUpdate);
+        editor.putString(MHSConstants.lastUpdatePrefName, lastUpdate);
         editor.commit();
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         //Save update date
         SharedPreferences.Editor editor = getSharedPreferences("MHSEvents", MODE_PRIVATE).edit();
-        editor.putString(lastUpdatePrefName, lastUpdate);
+        editor.putString(MHSConstants.lastUpdatePrefName, lastUpdate);
         editor.commit();
 
-        //Call super
+        //Call super last, to ensure that we commit
         super.onDestroy();
     }
+
     /**
      * This method first removes events that shouldn't be shown,
      * then sorts the events that remain
      */
     private void orderAndRemoveEvents() {
         //Save variables for the current date
-        int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(new Date())),
-                month = Integer.parseInt(new SimpleDateFormat("MM").format(new Date())),
-                day = Integer.parseInt(new SimpleDateFormat("dd").format(new Date()));
+        Date date = new Date();
+        int year = Integer.parseInt(new SimpleDateFormat("yyyy").format(date)),
+                month = Integer.parseInt(new SimpleDateFormat("MM").format(date)),
+                day = Integer.parseInt(new SimpleDateFormat("dd").format(date));
 
         //Go through the arraylist of all events. If it shouldn't be shown, remove it
         for (int i = 0; i < Events.size(); i++) {
@@ -196,11 +202,15 @@ public class MainActivity extends ActionBarActivity {
                 //Create a string to hold the file lines
                 String fileLines = "";
                 //Open file from internal storage
-                Scanner scan = new Scanner(openFileInput(calName));
+                Scanner scan = new Scanner(openFileInput(MHSConstants.calName));
+
+                //First line is just headers, so just throw it away.
+                scan.nextLine();
 
                 //Read lines until none are left, and append to string
                 while (scan.hasNextLine()) {
-                    fileLines += scan.nextLine() + "\n";
+                    String tmp =  scan.nextLine() + "\n";
+                    fileLines += tmp;
                 }
 
                 //If we made it to here, we succeeded.
@@ -222,52 +232,63 @@ public class MainActivity extends ActionBarActivity {
      * and puts them into an arraylist of events
      */
     private void readFileIntoArrayList() {
+        readFileIntoArrayList(0);
+    }
+
+    private void readFileIntoArrayList(int tries){
         //Start by initializing the arraylist
         Events = new ArrayList<>(0);
 
-        //Create a variable to keep track of how many times we go through and try
-        //to read events
-        int count;
-        //Try to read events while our list is empty
-        //and we haven't gone through 3 times
-        for (count = 0; Events.size() == 0 && count < 3; count++) {
-            //Go through each line in the file
-            for (String str : readLines().split("\n")) {
-                //If we have the right number of fields
-                if (str.split(",,").length == 7) {
-                    //Split the line and make a new event from it
-                    Events.add(new MHSEvent(str.split(",,")));
-                }
+        if(!fileExists(MHSConstants.calName)){
+            //If the CSV doesn't exist, make a new one
+            makeCSV();
+        }
+
+
+
+        //TODO This is the parser. It should be rewritten.
+        for (String str : readLines().split("\n")) {
+            //If we have the right number of fields
+            String [] line = str.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+            if (line.length == 8) {
+                //Split the line and make a new event from it, removing quotes
+               for(int i = 0; i < line.length; i++){
+                   line[i] = line[i].replace("\"", "");
+               }
+                Events.add(new MHSEvent(line));
             }
+        }
 
-
-            orderAndRemoveEvents();
-
+        orderAndRemoveEvents();
+        if(Events.size() == 0) {
             //If there are no events after sorting, or if the file was empty
-            if (Events.size() == 0) {
+            if (tries < 2) {
+                //If we haven't tried twice yet...
                 //Tell the user we are resetting...
                 Toast.makeText(this, R.string.eventError, Toast.LENGTH_SHORT).show();
 
                 //Then reset
                 makeCSV();
+
+                //And try again
+                readFileIntoArrayList(tries + 1);
+            } else {
+                //If we went through twice and still have no events,
+                //Something is wrong.
+
+                //Tell the user we have no events
+                Toast.makeText(this, R.string.noEvents, Toast.LENGTH_LONG).show();
+
+                //Reset the events list, to be safe
+                Events = new ArrayList<>();
+
+                //Then add a fake event to remind the user about the problem.
+                Events.add(new MHSEvent("Cannot load events",
+                        "Something bad happened and we cannot load events. Please check your " +
+                                "date and time settings and try an update.",
+                        new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none",
+                        new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none", "none", "none"));
             }
-        }
-
-        //If we went through three times and still have no events,
-        //Something is wrong.
-        if (count == 3 && Events.size() == 0) {
-            //Tell the user we have no events
-            Toast.makeText(this, R.string.noEvents, Toast.LENGTH_LONG).show();
-
-            //Reset the events list, to be safe
-            Events = new ArrayList<>();
-
-            //Then add a fake event to remind the user about the problem.
-            Events.add(new MHSEvent("Cannot load events",
-                    "Something bad happened and we cannot load events. Please check your " +
-                            "date and time settings and try an update.",
-                    new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none",
-                    new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none", "none",""));
         }
     }
 
@@ -330,7 +351,7 @@ public class MainActivity extends ActionBarActivity {
         try {
             //Create output stream to internal storage
             FileOutputStream outputStream;
-            outputStream = openFileOutput(calName, Context.MODE_PRIVATE);
+            outputStream = openFileOutput(MHSConstants.calName, Context.MODE_PRIVATE);
 
             //Write bytes from string
             outputStream.write(fileLines.getBytes());
@@ -349,10 +370,11 @@ public class MainActivity extends ActionBarActivity {
     private void update() {
         //Create and show a dialog to tell teh user we are updating
         //Download the file in an async task.
-        AsyncTask<Void,Void,Void> task = new Downloader(this);
+        AsyncTask<Void, Void, Void> task = new Downloader(this);
 
         //Run the previously defined task
         task.execute((Void[]) null);
+        lastUpdate = new SimpleDateFormat("MM/dd/yyyy").format(new Date());
     }
 
     /**
@@ -420,11 +442,15 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             case R.id.action_facebook:
                 //For facebook button, open Mamkschools facebook
-                openURL("http://www.facebook.com/MamaroneckPublicSchools");
+                if(!openURL("fb://facewebmodal/f?href="
+                        + "http://www.facebook.com/MamaroneckPublicSchools")) {
+                    //If facebook isn't installed, try again with browser
+                    openURL("http://www.facebook.com/MamaroneckPublicSchools");
+                }
                 return true;
             case R.id.action_twitter:
                 //For twitter button, try to open twitter app to Mamkschools
-                if (!openURL("twitter://twitter.com/MamaroneckED")) {
+                if (!openURL("twitter://user?screen_name=MamaroneckED")) {
                     //If twitter isn't installed, try again with browser
                     openURL("http://www.twitter.com/MamaroneckED");
                 }
@@ -442,8 +468,9 @@ public class MainActivity extends ActionBarActivity {
      * Open a URL
      *
      * @param url URL to open
+     * @return If the URL was opened
      */
-    public boolean openURL(String url) {
+    private boolean openURL(String url) {
         try {
             //Try to open page with browser or other app
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
@@ -455,10 +482,25 @@ public class MainActivity extends ActionBarActivity {
             return false;
         }
     }
+
+    /**
+     *
+     * @return If there is a network connection available
+     */
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    /**
+     *
+     * @param fname File name to check
+     * @return If the file exists or not
+     */
+    public boolean fileExists(String fname){
+        File file = getBaseContext().getFileStreamPath(fname);
+        return file.exists();
     }
 }

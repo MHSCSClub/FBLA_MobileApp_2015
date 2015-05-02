@@ -13,11 +13,14 @@ import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 //End of import section
@@ -65,7 +68,19 @@ public class eventDummy extends ActionBarActivity implements View.OnClickListene
             shareBtn.setOnClickListener(this);
             Button calBtn = (Button) findViewById(R.id.calBtn);
             calBtn.setOnClickListener(this);
+
+            //Setup event image
+            setImage((ImageView) findViewById(R.id.eventImg), myEvent.getEventType());
         }
+    }
+
+    /**
+     *
+     * @param iv
+     * @param type
+     */
+    private void setImage(ImageView iv, String type){
+        iv.setImageResource(MHSConstants.getImg(type));
     }
 
     /**

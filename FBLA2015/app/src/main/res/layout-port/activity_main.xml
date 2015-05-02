@@ -119,6 +119,15 @@
                 android:cropToPadding="false"
                 android:scaleType="centerCrop" />
 
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/imageView11"
+                android:src="@drawable/p11"
+                android:adjustViewBounds="true"
+                android:cropToPadding="false"
+                android:scaleType="centerCrop" />
+
         </ViewFlipper>
 
         <ListView

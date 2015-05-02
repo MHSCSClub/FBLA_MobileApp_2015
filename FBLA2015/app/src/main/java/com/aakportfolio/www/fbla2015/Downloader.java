@@ -19,16 +19,11 @@ import java.net.URLConnection;
 /**
  * Created by Andrew Katz on 5/1/2015.
  */
-public class Downloader extends AsyncTask<Void,Void,Void>   {
-    //Calandar Filename
-    private static final String calName = "cal.csv";
+public class Downloader extends AsyncTask<Void, Void, Void> {
+    //This variable holds the main activity, and the context for the progress dialog, etc.
+    private MainActivity m;
 
-
-    //File download URL. Can be changed to the school if needed.
-    //Currently uses a link from github due to lack of access to school webserver
-    private static final String downloadURL = "http://aakatz3.github.io/2015MamkFBLAApp/cal.csv";
-    MainActivity m;
-    public Downloader(MainActivity ma){
+    public Downloader(MainActivity ma) {
         m = ma;
         progress = ProgressDialog.show(m, "Downloading updated events...",
                 "Please wait, downloading...", true, true,
@@ -39,18 +34,22 @@ public class Downloader extends AsyncTask<Void,Void,Void>   {
                     }
                 });
     }
+
     //This boolean will keep track of whether we fail or not
     private boolean fail;
     private ProgressDialog progress;
+
     @Override
     protected void onPreExecute() {
 
-
+        fail = true;
 
     }
+
     /**
      * Main background method. This is where the download happens
-     * @param params   Required
+     *
+     * @param params Required
      * @return null
      */
     @Override
@@ -58,13 +57,14 @@ public class Downloader extends AsyncTask<Void,Void,Void>   {
         //Try to download
         try {
             //Connect to website
-            URL website = new URL(downloadURL);
+            URL website = new URL(MHSConstants.downloadURL);
             URLConnection connection = website.openConnection();
             connection.connect();
             InputStream input = new BufferedInputStream(website.openStream());
 
             //Create output stream to write file to internal storage
-            FileOutputStream outputStream = m.openFileOutput(calName+1, Context.MODE_PRIVATE);
+            FileOutputStream outputStream = m.openFileOutput(MHSConstants.calName + 1,
+                    Context.MODE_PRIVATE);
 
             //This array will hold the downloaded data
             byte data[] = new byte[1024];
@@ -82,7 +82,8 @@ public class Downloader extends AsyncTask<Void,Void,Void>   {
             input.close();
 
             //Copy now that we have fully downloaded
-            copy(m.openFileInput(calName + 1), m.openFileOutput(calName, Context.MODE_PRIVATE));
+            copy(m.openFileInput(MHSConstants.calName + 1),
+                    m.openFileOutput(MHSConstants.calName, Context.MODE_PRIVATE));
             //Note that we did not fail
             fail = false;
         } catch (Exception e) {
@@ -97,7 +98,8 @@ public class Downloader extends AsyncTask<Void,Void,Void>   {
 
     /**
      * This method is called when background task is done
-     * @param result  we do not care
+     *
+     * @param result we do not care
      */
     @Override
     protected void onPostExecute(Void result) {
