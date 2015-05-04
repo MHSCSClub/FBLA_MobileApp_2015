@@ -13,11 +13,9 @@ import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.Bundle;
 import android.provider.CalendarContract;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -25,14 +23,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 //End of import section
 
-public class eventDummy extends ActionBarActivity implements View.OnClickListener {
+public class eventDummy extends AppCompatActivity implements View.OnClickListener {
     //Event passed from MainActivity
     private MHSEvent myEvent;
 
     /**
      * This method runs on launch of the activity
      *
-     * @param savedInstanceState
+     * @param savedInstanceState To match superclass
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {

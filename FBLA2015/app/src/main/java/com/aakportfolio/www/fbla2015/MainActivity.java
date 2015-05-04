@@ -10,10 +10,7 @@ package com.aakportfolio.www.fbla2015;
 
 //Import Section
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,9 +21,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,23 +31,13 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     //ListView on main page
     private ListView LV;
 
-    //This string allows us to update data
+    //This string allows us to update data only once per day
     private String lastUpdate;
 
     /**
@@ -122,9 +107,8 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     protected void onResume() {
-        //Standard android setup
+        //Always call the super class
         super.onResume();
-
 
         //See if the listview was refilled today, and update preformed
         if (!new SimpleDateFormat("MM/dd/yyyy").format(new Date()).equals(lastUpdate)) {
@@ -144,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
-        //Call super
+        //Call super first
         super.onPause();
 
         //Save update date
@@ -209,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //Read lines until none are left, and append to string
                 while (scan.hasNextLine()) {
-                    String tmp =  scan.nextLine() + "\n";
+                    String tmp = scan.nextLine() + "\n";
                     fileLines += tmp;
                 }
 
@@ -235,37 +219,37 @@ public class MainActivity extends AppCompatActivity {
         readFileIntoArrayList(0);
     }
 
-    private void readFileIntoArrayList(int tries){
+    private void readFileIntoArrayList(int tries) {
         //Start by initializing the arraylist
         Events = new ArrayList<>(0);
 
-        if(!fileExists(MHSConstants.calName)){
+        if (!fileExists(MHSConstants.calName)) {
             //If the CSV doesn't exist, make a new one
             makeCSV();
         }
 
 
-
         //TODO This is the parser. It should be rewritten.
         for (String str : readLines().split("\n")) {
             //If we have the right number of fields
-            String [] line = str.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+            String[] line = str.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
             if (line.length == 8) {
                 //Split the line and make a new event from it, removing quotes
-               for(int i = 0; i < line.length; i++){
-                   line[i] = line[i].replace("\"", "");
-               }
+                for (int i = 0; i < line.length; i++) {
+                    line[i] = line[i].replace("\"", "");
+                }
                 Events.add(new MHSEvent(line));
             }
         }
 
         orderAndRemoveEvents();
-        if(Events.size() == 0) {
+        if (Events.size() == 0) {
             //If there are no events after sorting, or if the file was empty
             if (tries < 2) {
                 //If we haven't tried twice yet...
                 //Tell the user we are resetting...
-                Toast.makeText(this, R.string.eventError, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.eventError,
+                        Toast.LENGTH_SHORT).show();
 
                 //Then reset
                 makeCSV();
@@ -277,7 +261,8 @@ public class MainActivity extends AppCompatActivity {
                 //Something is wrong.
 
                 //Tell the user we have no events
-                Toast.makeText(this, R.string.noEvents, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.noEvents,
+                        Toast.LENGTH_LONG).show();
 
                 //Reset the events list, to be safe
                 Events = new ArrayList<>();
@@ -287,7 +272,8 @@ public class MainActivity extends AppCompatActivity {
                         "Something bad happened and we cannot load events. Please check your " +
                                 "date and time settings and try an update.",
                         new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none",
-                        new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none", "none", "none"));
+                        new SimpleDateFormat("MM/dd/yyyy").format(new Date()), "none",
+                        "none", "none"));
             }
         }
     }
@@ -442,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_facebook:
                 //For facebook button, open Mamkschools facebook
-                if(!openURL("fb://facewebmodal/f?href="
+                if (!openURL("fb://facewebmodal/f?href="
                         + "http://www.facebook.com/MamaroneckPublicSchools")) {
                     //If facebook isn't installed, try again with browser
                     openURL("http://www.facebook.com/MamaroneckPublicSchools");
@@ -478,13 +464,12 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } catch (Exception e) {
             //If error, print stack and return false
-            e.printStackTrace();
+            if (MHSConstants.debug) e.printStackTrace();
             return false;
         }
     }
 
     /**
-     *
      * @return If there is a network connection available
      */
     private boolean isNetworkAvailable() {
@@ -495,12 +480,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
      * @param fname File name to check
      * @return If the file exists or not
      */
-    public boolean fileExists(String fname){
+    public boolean fileExists(String fname) {
         File file = getBaseContext().getFileStreamPath(fname);
         return file.exists();
+    }
+
+    public void nextImage(View v) {
+        ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
+        vf.showNext();
     }
 }

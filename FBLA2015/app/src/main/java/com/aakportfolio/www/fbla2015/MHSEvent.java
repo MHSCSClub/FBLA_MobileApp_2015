@@ -29,9 +29,9 @@ public class MHSEvent implements Serializable, Comparable {
     //Email Address
     private String contactEmail = "events-temp@mamkschools.org";
     //Date variables
-    private int MM = 00;
-    private int DD = 00;
-    private int YYYY = 0000;
+    private int MM = 0;
+    private int DD = 0;
+    private int YYYY = 0;
     private String eventStartDate = "00/00/0000";
     private String eventEndDate = "00/00/0000";
     //Millisecond variables
@@ -94,6 +94,7 @@ public class MHSEvent implements Serializable, Comparable {
                             endMillisec = seconds * 1000L;
                             eventDescription += "End Time: " + endTime + "\n";
                         } catch (Exception e) {
+                            e.printStackTrace();
                             //Leave it blank, treat it as if there is no end time
                         }
                     }

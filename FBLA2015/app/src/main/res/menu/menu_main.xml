@@ -1,3 +1,4 @@
+<!-- This file controls the action bar of the main screen -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:mhsEvents="http://schemas.android.com/apk/res-auto">
 
@@ -19,7 +20,7 @@
         mhsEvents:showAsAction="always" />
 
     <!-- Website, Appear if room -->
-    <item
+    <item1
         android:id="@+id/action_website"
         android:icon="@drawable/ic_website"
         android:title="@string/action_website"
