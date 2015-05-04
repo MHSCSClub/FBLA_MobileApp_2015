@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -25,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -94,6 +96,14 @@ public class MainActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayShowHomeEnabled(true);
             actionBar.setIcon(R.drawable.ic_launcher);
+        }
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            ViewFlipper v = (ViewFlipper) findViewById(R.id.viewFlipper);
+            v.setInAnimation(this, R.animator.fade_in);
+            v.setOutAnimation(this, R.animator.fade_out);
+            v.setAnimateFirstView(false);
+            v.startFlipping();
         }
         //Fill listview for initial time
         fillListView();
@@ -488,8 +498,19 @@ public class MainActivity extends AppCompatActivity {
         return file.exists();
     }
 
-    public void nextImage(View v) {
-        ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
-        vf.showNext();
+
+    public void pauseFlip(View v) {
+        //If we are in portrait, pause/unpause viewflipper
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
+                && v == findViewById(R.id.viewFlipper)) {
+            ViewFlipper flipper = (ViewFlipper) v;
+            if (flipper.isFlipping()) {
+                flipper.stopFlipping();
+            } else {
+                flipper.showNext();
+                flipper.startFlipping();
+            }
+        }
     }
+
 }

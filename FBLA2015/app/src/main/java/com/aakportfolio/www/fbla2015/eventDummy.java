@@ -73,9 +73,9 @@ public class eventDummy extends AppCompatActivity implements View.OnClickListene
     }
 
     /**
-     *
-     * @param iv
-     * @param type
+     * Sets image based on type of event, using thing in constants
+     * @param iv Imageview to change
+     * @param type Type of event
      */
     private void setImage(ImageView iv, String type){
         iv.setImageResource(MHSConstants.getImg(type));
@@ -84,7 +84,7 @@ public class eventDummy extends AppCompatActivity implements View.OnClickListene
     /**
      * onClick method handles button clicks
      *
-     * @param v
+     * @param v View that sent onclick
      */
     @Override
     public void onClick(View v) {

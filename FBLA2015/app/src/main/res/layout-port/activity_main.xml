@@ -7,9 +7,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".MainActivity"
-    android:backgroundTint="#ffff7700"
-
-    android:background="#00ff8276">
+    android:background="#8fff7900">
 
 
     <LinearLayout
@@ -22,13 +20,13 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/viewFlipper"
-            android:nestedScrollingEnabled="true"
             android:autoStart="true"
             android:animateFirstView="true"
-            android:flipInterval="2500"
+            android:flipInterval="2000"
             android:layout_gravity="center_horizontal"
             android:layout_weight="2"
-            android:onClick="nextImage">
+            android:longClickable="false"
+            android:onClick="pauseFlip">
 
             <ImageView
                 android:layout_width="match_parent"
@@ -137,7 +135,8 @@
             android:id="@+id/listView"
             android:visibility="visible"
             android:entries="@array/list"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:clickable="false" />
 
     </LinearLayout>
 

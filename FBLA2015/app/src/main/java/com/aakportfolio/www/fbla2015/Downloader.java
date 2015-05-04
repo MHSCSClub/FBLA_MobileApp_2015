@@ -18,12 +18,23 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
+ * This class contains the ASync Task used for downloading updates
  * Created by Andrew Katz on 5/1/2015.
  */
 public class Downloader extends AsyncTask<Void, Void, Void> {
     //This variable holds the main activity, and the context for the progress dialog, etc.
     private MainActivity m;
 
+    //This boolean will keep track of whether we fail or not
+    private boolean fail;
+
+    //This holds our progress dialog so we can close it at the end.
+    private ProgressDialog progress;
+
+    /**
+     * Constructor. Runs first, when task is created.
+     * @param ma
+     */
     public Downloader(MainActivity ma) {
         m = ma;
         progress = ProgressDialog.show(m, "Downloading updated events...",
@@ -36,15 +47,9 @@ public class Downloader extends AsyncTask<Void, Void, Void> {
                 });
     }
 
-    //This boolean will keep track of whether we fail or not
-    private boolean fail;
-    private ProgressDialog progress;
-
     @Override
     protected void onPreExecute() {
-
         fail = true;
-
     }
 
     /**

@@ -20,7 +20,7 @@
         mhsEvents:showAsAction="always" />
 
     <!-- Website, Appear if room -->
-    <item1
+    <item
         android:id="@+id/action_website"
         android:icon="@drawable/ic_website"
         android:title="@string/action_website"
