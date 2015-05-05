@@ -2,9 +2,12 @@
 /**
  * This is a class for each event
  * This object is for storing an event (1 line from the CSV file)
+ *
  * Created by Andrew on 1/19/2015.
+ * Version 2.0 released 5/4/2015.
+ *
  * @author Andrew Katz
- * @version 1.0
+ * @version 2.0
  */
 
 package com.aakportfolio.www.fbla2015;
@@ -47,10 +50,11 @@ public class MHSEvent implements Serializable, Comparable {
      * @param name        Event name
      * @param Description Event Description
      * @param startDate   Event date (MM/DD/YYYY)
-     * @param startTime   Start time for event (HH:MM AMPM)
+     * @param startTime   Start time for event (HH:MM AM/PM)
      * @param endDate     Ending date of event (MM/DD/YYYY)
-     * @param endTime     End time (HH:MM AMPM)
+     * @param endTime     End time (HH:MM AM/PM)
      * @param email       email address
+     * @param type        event type. Should be in the hashmap.
      */
     public MHSEvent(String name, String Description, String startDate, String startTime,
                     String endDate, String endTime, String email, String type) {
@@ -94,7 +98,9 @@ public class MHSEvent implements Serializable, Comparable {
                             endMillisec = seconds * 1000L;
                             eventDescription += "End Time: " + endTime + "\n";
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            if(MHSConstants.debug){
+                                e.printStackTrace();
+                            }
                             //Leave it blank, treat it as if there is no end time
                         }
                     }
@@ -117,12 +123,14 @@ public class MHSEvent implements Serializable, Comparable {
             eventStartDate = startDate;
         } catch (Exception e) {
             //If invalid date, basically nullify the event
-            MM = 00;
-            DD = 00;
-            YYYY = 00;
+            MM = 0;
+            DD = 0;
+            YYYY = 0;
             eventStartDate = "00/00/0000";
             eventEndDate = "00/00/0000";
-            e.printStackTrace();
+            if(MHSConstants.debug) {
+                e.printStackTrace();
+            }
         }
         //Set the last variables
         contactEmail = email.trim();
@@ -131,11 +139,11 @@ public class MHSEvent implements Serializable, Comparable {
 
     /**
      * This constructor takes an array (from String.split) and passes it to the main constructor.
-     *
-     * @param inArr Array of All the same paramaters of main constructor
+     * Precondition: inArr has length of 8
+     * @param inArr Array of all the same paramaters of main constructor
      */
     public MHSEvent(String[] inArr) {
-        this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5], inArr[6],inArr[7]);
+        this(inArr[0], inArr[1], inArr[2], inArr[3], inArr[4], inArr[5], inArr[6], inArr[7]);
     }
 
 
@@ -155,7 +163,9 @@ public class MHSEvent implements Serializable, Comparable {
             if (nowYYYY > YYYY1) return false;
             return nowYYYY >= YYYY1 && ((nowYYYY != YYYY1) || ((nowMM < MM1) || (nowMM <= MM1 && nowDD <= DD1)));
         } catch (Exception e) {
-            e.printStackTrace();
+            if (MHSConstants.debug){
+                e.printStackTrace();
+            }
             return false;
         }
     }
@@ -163,12 +173,12 @@ public class MHSEvent implements Serializable, Comparable {
     /**
      * Compares MHSEvetns by start date. For sorting.
      *
-     * @param another
-     * @return
+     * @param another Another object to compare to
+     * @return value of object comparison (- is less, 0 i equal, 1 is greater)
      */
     @Override
     public int compareTo(Object another) {
-        if (!(another instanceof MHSEvent)) return -1;
+        if (another == null || !(another instanceof MHSEvent)) return -1;
         int[] anotherEventDateArray = ((MHSEvent) another).getDateFields();
         if (YYYY < anotherEventDateArray[2]) {
             return -1;
@@ -192,19 +202,29 @@ public class MHSEvent implements Serializable, Comparable {
     }
 
     /**
-     * Tostring
+     * toString: returns event name
      *
      * @return event name
      */
+    @Override
     public String toString() {
         return getEventName();
     }
 
     //Begin getter methods
+
+    /**
+     * Getter for start calendar
+     * @return returns GregorianCalendar object of start date
+     */
     public GregorianCalendar getCalStart() {
         return new GregorianCalendar(YYYY, MM, DD);
     }
 
+    /**
+     * Getter for end calendar
+     * @return returns GregorianCalendar for event end date
+     */
     public GregorianCalendar getCalEnd() {
         try {
             int MM1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[0]),
@@ -212,54 +232,101 @@ public class MHSEvent implements Serializable, Comparable {
                     YYYY1 = Integer.parseInt(eventEndDate.split(Pattern.quote("/"))[2]);
             return new GregorianCalendar(YYYY1, MM1, DD1);
         } catch (Exception e) {
-            e.printStackTrace();
+            if(MHSConstants.debug){
+                e.printStackTrace();
+            }
             return new GregorianCalendar(YYYY, MM, DD);
         }
 
     }
 
-    public String getEventType(){
+    /**
+     * getter for eventType
+     * @return eventType
+     */
+    public String getEventType() {
         return eventType;
     }
 
+    /**
+     * Getter for start milliseconds
+     * @return startMillisec
+     */
     public long startMS() {
         return startMillisec;
     }
 
+    /**
+     * Getter for end milliseconds
+     * @return endMillisec
+     */
     public long endMS() {
         return endMillisec;
     }
 
+    /**
+     * Getter for all day boolean
+     * @return isAllDay
+     */
     public boolean getIsAllDay() {
         return isAllDay;
     }
 
+    /**
+     * Getter for event name
+     * @return eventName
+     */
     public String getEventName() {
         return eventName;
     }
 
+    /**
+     * Getter for event description
+     * @return eventDescription
+     */
     public String getEventDescription() {
         return eventDescription;
     }
 
+    /**
+     * Getter for contact email
+     * @return contactEmail
+     */
     public String getContactEmail() {
         return contactEmail;
     }
 
+    /**
+     * getter for event dates
+     * @return If event has only start date, just return that, else return start and end date.
+     */
     public String getEventDates() {
         return eventStartDate.equals(eventEndDate)
                 ? "Date: " + eventStartDate
-                : "Starts: " + eventStartDate + "\n" + "Ends: " + eventEndDate;
+                : "Starts: " + eventStartDate
+                + "\n" + "Ends: " + eventEndDate;
     }
 
+    /**
+     * Getter for start date
+     * @return eventStartDate
+     */
     public String getEventStartDate() {
         return eventStartDate;
     }
 
+    /**
+     * Getter for the end date
+     * @return eventEndDate
+     */
     public String getEventEndDate() {
         return eventEndDate;
     }
 
+    /**
+     * Getter for teh date fields in array
+     * @return An array with month, date, year of event start
+     */
     public int[] getDateFields() {
         return new int[]{MM, DD, YYYY};
     }

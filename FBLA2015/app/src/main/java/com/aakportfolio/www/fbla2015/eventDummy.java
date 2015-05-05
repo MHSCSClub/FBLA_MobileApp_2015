@@ -2,8 +2,12 @@
 /**
  * This is the activity for each event in this android app.
  * Upon selecting an event, this loads, and is changed based on the event.
+ *
+ * Created by Andrew on 1/19/2015.
+ * Version 2.0 released 5/4/2015.
+ *
  * @author Andrew Katz
- * @version 1.0
+ * @version 2.0
  */
 package com.aakportfolio.www.fbla2015;
 
@@ -15,17 +19,48 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.CalendarContract;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.HashMap;
 //End of import section
 
 public class eventDummy extends AppCompatActivity implements View.OnClickListener {
+    //Image map used to get images for event types
+    private static final HashMap<String, Integer> imageMap = makeMap();
+
     //Event passed from MainActivity
     private MHSEvent myEvent;
+
+    /**
+     * Makes the hashmap for images
+     * Used for setting constant
+     *
+     * @return Completed map
+     */
+    private static HashMap<String, Integer> makeMap() {
+        HashMap<String, Integer> map = new HashMap<>();
+        map.put("none", R.drawable.ic_launcher);
+        map.put("pace", R.mipmap.ic_pace);
+        map.put("music", R.mipmap.ic_music);
+        map.put("test", R.mipmap.ic_test);
+        map.put("sports", R.mipmap.ic_sports);
+        map.put("school", R.mipmap.ic_school);
+        map.put("art", R.mipmap.ic_art);
+        map.put("research", R.mipmap.ic_research);
+        map.put("graduation", R.mipmap.ic_graduation);
+        map.put("dance", R.mipmap.ic_dance);
+        map.put("award", R.mipmap.ic_award);
+        map.put("fbla", R.mipmap.ic_fbla);
+        return map;
+    }
 
     /**
      * This method runs on launch of the activity
@@ -35,8 +70,14 @@ public class eventDummy extends AppCompatActivity implements View.OnClickListene
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //Standard android setup
-        super.onCreate(savedInstanceState);                     //Let android do the normal things
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_dummy);
+
+        //Enable back/up button in action bar
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
 
         //Get event passed to this activity
         Intent intent = getIntent();
@@ -74,11 +115,12 @@ public class eventDummy extends AppCompatActivity implements View.OnClickListene
 
     /**
      * Sets image based on type of event, using thing in constants
-     * @param iv Imageview to change
+     *
+     * @param iv   Imageview to change
      * @param type Type of event
      */
-    private void setImage(ImageView iv, String type){
-        iv.setImageResource(MHSConstants.getImg(type));
+    private void setImage(ImageView iv, String type) {
+        iv.setImageResource(imageMap.get(type) != null ? imageMap.get(type) : imageMap.get("none"));
     }
 
     /**
@@ -199,9 +241,28 @@ public class eventDummy extends AppCompatActivity implements View.OnClickListene
             startActivity(calIntent);
         } catch (Exception e) {
             //If this fails, (which it shouldn't), tell user
-            e.printStackTrace();
+            if (MHSConstants.debug) {
+                e.printStackTrace();
+            }
             Toast.makeText(this, "Error creating calendar  event. Is calendar installed and " +
                     "working?", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Handle the back/home/up button on the action bar
+     * @param item Selected actiion item
+     * @return If we have an action for it
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home/Back button
+            case android.R.id.home:
+                //Return to activity in last state by closing this activity
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

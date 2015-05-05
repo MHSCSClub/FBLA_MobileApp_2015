@@ -1,6 +1,7 @@
 //Filename: Downloader.java
 package com.aakportfolio.www.fbla2015;
 
+//Imports Section
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,22 +9,25 @@ import android.os.AsyncTask;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
 /**
  * This class contains the ASync Task used for downloading updates
+ *
  * Created by Andrew Katz on 5/1/2015.
+ * Version 2.0 released 5/4/2015.
+ *
+ * @author Andrew Katz
+ * @version 2.0
  */
 public class Downloader extends AsyncTask<Void, Void, Void> {
     //This variable holds the main activity, and the context for the progress dialog, etc.
-    private MainActivity m;
+    private MainActivity mainActivity;
 
     //This boolean will keep track of whether we fail or not
     private boolean fail;
@@ -33,11 +37,12 @@ public class Downloader extends AsyncTask<Void, Void, Void> {
 
     /**
      * Constructor. Runs first, when task is created.
-     * @param ma
+     *
+     * @param caller
      */
-    public Downloader(MainActivity ma) {
-        m = ma;
-        progress = ProgressDialog.show(m, "Downloading updated events...",
+    public Downloader(MainActivity caller) {
+        mainActivity = caller;
+        progress = ProgressDialog.show(mainActivity, "Downloading updated events...",
                 "Please wait, downloading...", true, true,
                 new DialogInterface.OnCancelListener() {
                     @Override
@@ -69,7 +74,7 @@ public class Downloader extends AsyncTask<Void, Void, Void> {
             InputStream input = new BufferedInputStream(website.openStream());
 
             //Create output stream to write file to internal storage
-            FileOutputStream outputStream = m.openFileOutput(MHSConstants.calName + 1,
+            FileOutputStream outputStream = mainActivity.openFileOutput(MHSConstants.calName + 1,
                     Context.MODE_PRIVATE);
 
             //This array will hold the downloaded data
@@ -88,13 +93,15 @@ public class Downloader extends AsyncTask<Void, Void, Void> {
             input.close();
 
             //Copy now that we have fully downloaded
-            copy(m.openFileInput(MHSConstants.calName + 1),
-                    m.openFileOutput(MHSConstants.calName, Context.MODE_PRIVATE));
+            copy(mainActivity.openFileInput(MHSConstants.calName + 1),
+                    mainActivity.openFileOutput(MHSConstants.calName, Context.MODE_PRIVATE));
             //Note that we did not fail
             fail = false;
         } catch (Exception e) {
-            //If we fail, output debug info
-            e.printStackTrace();
+            //If we fail, output debug info (if in debug mode
+            if(MHSConstants.debug){
+                e.printStackTrace();
+            }
 
             //Also note that we failed
             fail = true;
@@ -112,20 +119,26 @@ public class Downloader extends AsyncTask<Void, Void, Void> {
         //See if we failed, and tell the user what happened
         if (fail) {
             //Tell them we failed
-            Toast.makeText(m, "Could not download event list.",
+            Toast.makeText(mainActivity, "Could not download event list.",
                     Toast.LENGTH_SHORT).show();
         } else {
             //Tell the user we succeeded
 
-            Toast.makeText(m,
+            Toast.makeText(mainActivity,
                     "Update completed.", Toast.LENGTH_SHORT).show();
             //Refill the listview
-            m.fillListView();
+            mainActivity.fillListView();
         }
         //Dismiss progress bar
         progress.dismiss();
     }
 
+    /**
+     * Copies a file to another by input stream
+     * @param in FileInputStream from input file
+     * @param out FileOutputStream to out file
+     * @throws IOException if error
+     */
     public void copy(FileInputStream in, FileOutputStream out) throws IOException {
 
         // Transfer bytes from in to out
@@ -135,6 +148,7 @@ public class Downloader extends AsyncTask<Void, Void, Void> {
             out.write(buf, 0, len);
         }
         in.close();
+        out.flush();
         out.close();
     }
 }

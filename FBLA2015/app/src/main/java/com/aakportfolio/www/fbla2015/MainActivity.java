@@ -3,8 +3,11 @@
  * This is the starting activity for this android app.
  * Upon launching the app, this file is used.
  *
+ * Created by Andrew on 1/19/2015.
+ * Version 2.0 released 5/4/2015.
+ *
  * @author Andrew Katz
- * @version 1.0
+ * @version 2.0
  */
 package com.aakportfolio.www.fbla2015;
 
@@ -26,7 +29,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -49,8 +51,8 @@ import java.util.Scanner;
 
 //End of Imports
 
-public class MainActivity extends AppCompatActivity {
-    //This arraylist contians events from file
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    //This arraylist contains events from file
     private ArrayList<MHSEvent> Events;
 
     //ListView on main page
@@ -98,12 +100,14 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setIcon(R.drawable.ic_launcher);
         }
 
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-            ViewFlipper v = (ViewFlipper) findViewById(R.id.viewFlipper);
-            v.setInAnimation(this, R.animator.fade_in);
-            v.setOutAnimation(this, R.animator.fade_out);
-            v.setAnimateFirstView(false);
-            v.startFlipping();
+        //If we are in portrait, setup the ViewFlipper (banner)
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            ViewFlipper banner = (ViewFlipper) findViewById(R.id.viewFlipper);
+            banner.setOnClickListener(this);
+            banner.setInAnimation(this, R.animator.fade_in);
+            banner.setOutAnimation(this, R.animator.fade_out);
+            banner.setAnimateFirstView(false);
+            banner.startFlipping();
         }
         //Fill listview for initial time
         fillListView();
@@ -136,6 +140,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * This method is called whenever the view is hidden (another view opened, etc.)
+     * We commit the preference just in case, to prevent needless re-updates
+     */
     @Override
     public void onPause() {
         //Call super first
@@ -147,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    /**
+     * This method is called before the app is closed. We make sure to save the update date here
+     */
     @Override
     protected void onDestroy() {
         //Save update date
@@ -223,12 +234,16 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * This function gets the lines from the file
-     * and puts them into an arraylist of events
+     * and puts them into an arraylist of events. Just an overloaded header for simplicity
      */
     private void readFileIntoArrayList() {
         readFileIntoArrayList(0);
     }
 
+    /**
+     * This function actualy reads the lines of the file into teha arraylist
+     * @param tries try number, to prevent infinite recursion
+     */
     private void readFileIntoArrayList(int tries) {
         //Start by initializing the arraylist
         Events = new ArrayList<>(0);
@@ -239,15 +254,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        //TODO This is the parser. It should be rewritten.
         for (String str : readLines().split("\n")) {
-            //If we have the right number of fields
+            //Split the line at commas, except those in quotes (using this regular expression)
             String[] line = str.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
+
+            //If we have the right number of fields
             if (line.length == 8) {
                 //Split the line and make a new event from it, removing quotes
                 for (int i = 0; i < line.length; i++) {
+                    //Remove any quotes now that lines are split, for better readability
                     line[i] = line[i].replace("\"", "");
                 }
+                //Add the new event
                 Events.add(new MHSEvent(line));
             }
         }
@@ -356,7 +374,9 @@ public class MainActivity extends AppCompatActivity {
             outputStream.flush();
             outputStream.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            if (MHSConstants.debug) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -474,7 +494,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } catch (Exception e) {
             //If error, print stack and return false
-            if (MHSConstants.debug) e.printStackTrace();
+            if (MHSConstants.debug) {
+                e.printStackTrace();
+            }
             return false;
         }
     }
@@ -499,18 +521,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void pauseFlip(View v) {
-        //If we are in portrait, pause/unpause viewflipper
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
-                && v == findViewById(R.id.viewFlipper)) {
-            ViewFlipper flipper = (ViewFlipper) v;
-            if (flipper.isFlipping()) {
-                flipper.stopFlipping();
-            } else {
-                flipper.showNext();
-                flipper.startFlipping();
-            }
+    /**
+     * onClick, called when something clickable is tapped
+     * @param view View that was clicked
+     */
+    public void onClick(View view) {
+        //See what view was clicked
+        switch (view.getId()) {
+            case R.id.viewFlipper:
+                //If we are in portrait, pause/unpause viewflipper
+                if (getResources().getConfiguration().orientation
+                        == Configuration.ORIENTATION_PORTRAIT) {
+                    ViewFlipper banner = (ViewFlipper) view;
+                    //Are we flipping now?
+                    if (banner.isFlipping()) {
+                        //If yes, stop
+                        banner.stopFlipping();
+                    } else {
+                        //If no, show next image, then start flipping
+                        banner.showNext();
+                        banner.startFlipping();
+                    }
+                }
+                break;
+            default:
+                break;
         }
-    }
 
+    }
 }
