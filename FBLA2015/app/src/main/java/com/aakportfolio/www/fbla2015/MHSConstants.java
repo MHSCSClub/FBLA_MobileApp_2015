@@ -20,7 +20,7 @@ public final class MHSConstants {
     //File download URL. Can be changed to the school if needed.
     //Currently uses a link from GitHub due to lack of access to school web server,
     //and administrative restrictions on the school web server that prevent easy access
-    public static final String downloadURL = "http://aakatz3.github.io/2015MamkFBLAApp/cal.csv";
+    public static final String downloadURL = "http://aakatz3.asuscomm.com:8084/fbla2015/cal.csv";
 
     //Debug mode (print stack traces and logs)
     public static final boolean debug = false;
