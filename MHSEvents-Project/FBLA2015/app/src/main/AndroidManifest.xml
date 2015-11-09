@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This file is the android manifest -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.aakportfolio.www.fbla2015">
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+
+        <!-- Main activity (it has no parent activity) -->
+        <activity
+            android:name=".MainActivity"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Detailed event view -->
+        <!-- A child of the main activity -->
+        <activity
+            android:name=".eventDummy"
+            android:label="@string/title_activity_event_dummy"
+            android:parentActivityName="com.aakportfolio.www.fbla2015.MainActivity" >
+        <!-- Parent activity meta-data to support 4.0 and lower -->
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.aakportfolio.www.fbla2015.MainActivity" />
+        </activity>
+    </application>
+
+</manifest>
